@@ -1,0 +1,942 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": -10
+              },
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 0
+      },
+      "id": 7,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT SUM(closed_pnl) as value FROM user_trades WHERE time >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND time <= UNIX_TIMESTAMP($__timeTo()) * 1000",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Profit",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 15
+              },
+              {
+                "color": "red",
+                "value": 30
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 0
+      },
+      "id": 8,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 14,
+          "valueSize": 28
+        },
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT \n  ROUND(100.0 * SUM(CASE WHEN crossed = 1 THEN 1 ELSE 0 END) / COUNT(*), 1) as value,\n  ROUND(SUM(CASE WHEN crossed = 1 THEN fee ELSE 0 END), 2) as 'Fee ($)'\nFROM user_trades \nWHERE time >= UNIX_TIMESTAMP($__timeFrom()) * 1000 \n  AND time <= UNIX_TIMESTAMP($__timeTo()) * 1000",
+          "refId": "A"
+        }
+      ],
+      "title": "Taker Trades",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "green",
+                "value": 85
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 0
+      },
+      "id": 9,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {
+          "titleSize": 14,
+          "valueSize": 28
+        },
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT \n  ROUND(100.0 * SUM(CASE WHEN crossed = 0 THEN 1 ELSE 0 END) / COUNT(*), 1) as value,\n  ROUND(SUM(CASE WHEN crossed = 0 THEN fee ELSE 0 END), 2) as 'Fee ($)'\nFROM user_trades \nWHERE time >= UNIX_TIMESTAMP($__timeFrom()) * 1000 \n  AND time <= UNIX_TIMESTAMP($__timeTo()) * 1000",
+          "refId": "A"
+        }
+      ],
+      "title": "Maker Trades",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": true,
+            "axisColorMode": "text",
+            "axisLabel": "Profit (USD)",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "decimals": 4,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "lastNotNull"],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "title": "Average Profit per Trade (by Currency)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  FROM_UNIXTIME(FLOOR(time/1000/$window_seconds)*$window_seconds) as time,\n  coin as metric,\n  AVG(closed_pnl) as value\nFROM user_trades\nWHERE time >= UNIX_TIMESTAMP($__timeFrom()) * 1000\n  AND time <= UNIX_TIMESTAMP($__timeTo()) * 1000\nGROUP BY FLOOR(time/1000/$window_seconds), coin\nORDER BY time",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Win Rate (%)",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 1,
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 30
+              },
+              {
+                "color": "yellow",
+                "value": 45
+              },
+              {
+                "color": "green",
+                "value": 50
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 15
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "lastNotNull"],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "title": "Win Rate by Currency (%)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  FROM_UNIXTIME(FLOOR(time/1000/$window_seconds)*$window_seconds) as time,\n  coin as metric,\n  100.0 * SUM(CASE WHEN closed_pnl > 0 THEN 1 ELSE 0 END) / COUNT(*) as value\nFROM user_trades\nWHERE time >= UNIX_TIMESTAMP($__timeFrom()) * 1000\n  AND time <= UNIX_TIMESTAMP($__timeTo()) * 1000\nGROUP BY FLOOR(time/1000/$window_seconds), coin\nHAVING COUNT(*) > 0\nORDER BY time",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Price (USD)",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 5,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 25
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": ["lastNotNull", "mean"],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "title": "Mid Price (Traded Currencies Only)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "WITH traded_coins AS (\n  SELECT DISTINCT coin COLLATE utf8mb4_0900_ai_ci as pair\n  FROM user_trades\n  WHERE time >= UNIX_TIMESTAMP($__timeFrom()) * 1000\n    AND time <= UNIX_TIMESTAMP($__timeTo()) * 1000\n)\nSELECT\n  FROM_UNIXTIME(s.timestamp/1000) as time,\n  s.pair as metric,\n  (s.best_bid + s.best_ask) / 2 as value\nFROM spread_snapshots s\nINNER JOIN traded_coins tc ON s.pair = tc.pair\nWHERE s.timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000\n  AND s.timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000\nORDER BY time",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Price Volatility",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 15,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 6,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 35
+      },
+      "id": 3,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "title": "Price Volatility (Standard Deviation)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "WITH traded_coins AS (\n  SELECT DISTINCT coin COLLATE utf8mb4_0900_ai_ci as pair\n  FROM user_trades\n  WHERE time >= UNIX_TIMESTAMP($__timeFrom()) * 1000\n    AND time <= UNIX_TIMESTAMP($__timeTo()) * 1000\n)\nSELECT\n  FROM_UNIXTIME(FLOOR(s.timestamp/1000/$window_seconds)*$window_seconds) as time,\n  s.pair as metric,\n  STDDEV((s.best_bid + s.best_ask) / 2) as value\nFROM spread_snapshots s\nINNER JOIN traded_coins tc ON s.pair = tc.pair\nWHERE s.timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000\n  AND s.timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000\nGROUP BY FLOOR(s.timestamp/1000/$window_seconds), s.pair\nHAVING COUNT(*) >= 2\nORDER BY time",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Spread (BPS)",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 15,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 2,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 35
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "lastNotNull"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "title": "Moving Average Spread (BPS)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "WITH traded_coins AS (\n  SELECT DISTINCT coin COLLATE utf8mb4_0900_ai_ci as pair\n  FROM user_trades\n  WHERE time >= UNIX_TIMESTAMP($__timeFrom()) * 1000\n    AND time <= UNIX_TIMESTAMP($__timeTo()) * 1000\n)\nSELECT\n  FROM_UNIXTIME(FLOOR(s.timestamp/1000/$window_seconds)*$window_seconds) as time,\n  s.pair as metric,\n  AVG(s.spread_bps) as value\nFROM spread_snapshots s\nINNER JOIN traded_coins tc ON s.pair = tc.pair\nWHERE s.timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000\n  AND s.timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000\nGROUP BY FLOOR(s.timestamp/1000/$window_seconds), s.pair\nORDER BY time",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": true,
+            "axisColorMode": "text",
+            "axisLabel": "Avg Profit (USD)",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "hue",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 4,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": -0.05
+              },
+              {
+                "color": "yellow",
+                "value": -0.01
+              },
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Positions"
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "tooltip": false,
+                  "viz": true,
+                  "legend": false
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 44
+      },
+      "id": 5,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.8,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "orientation": "horizontal",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "title": "Profit by Position Hold Duration (Percentiles)",
+      "type": "barchart",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH position_pairs AS (\n  SELECT\n    coin,\n    time as close_time,\n    closed_pnl,\n    dir,\n    LAG(time) OVER (PARTITION BY coin ORDER BY time) as open_time,\n    LAG(dir) OVER (PARTITION BY coin ORDER BY time) as prev_dir,\n    (time - LAG(time) OVER (PARTITION BY coin ORDER BY time)) / 1000 as hold_duration_seconds\n  FROM user_trades\n  WHERE time >= UNIX_TIMESTAMP($__timeFrom()) * 1000\n    AND time <= UNIX_TIMESTAMP($__timeTo()) * 1000\n),\nclosed_positions AS (\n  SELECT\n    hold_duration_seconds,\n    closed_pnl\n  FROM position_pairs\n  WHERE dir LIKE 'Close%'\n    AND prev_dir LIKE 'Open%'\n    AND hold_duration_seconds IS NOT NULL\n    AND hold_duration_seconds > 0\n),\nduration_percentiles AS (\n  SELECT\n    hold_duration_seconds,\n    closed_pnl,\n    CASE\n      WHEN PERCENT_RANK() OVER (ORDER BY hold_duration_seconds) < 0.10 THEN 'P0-10 (Fast)'\n      WHEN PERCENT_RANK() OVER (ORDER BY hold_duration_seconds) < 0.25 THEN 'P10-25'\n      WHEN PERCENT_RANK() OVER (ORDER BY hold_duration_seconds) < 0.50 THEN 'P25-50'\n      WHEN PERCENT_RANK() OVER (ORDER BY hold_duration_seconds) < 0.75 THEN 'P50-75'\n      WHEN PERCENT_RANK() OVER (ORDER BY hold_duration_seconds) < 0.90 THEN 'P75-90'\n      ELSE 'P90-100 (Slow)'\n    END as percentile_bucket\n  FROM closed_positions\n)\nSELECT\n  percentile_bucket as Percentile,\n  AVG(closed_pnl) as \"Avg Profit\",\n  COUNT(*) as Positions\nFROM duration_percentiles\nGROUP BY percentile_bucket\nORDER BY\n  CASE percentile_bucket\n    WHEN 'P0-10 (Fast)' THEN 1\n    WHEN 'P10-25' THEN 2\n    WHEN 'P25-50' THEN 3\n    WHEN 'P50-75' THEN 4\n    WHEN 'P75-90' THEN 5\n    WHEN 'P90-100 (Slow)' THEN 6\n  END",
+          "refId": "A"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Positions": false
+            },
+            "indexByName": {
+              "Avg Profit": 1,
+              "Percentile": 0,
+              "Positions": 2
+            },
+            "renameByName": {}
+          }
+        }
+      ]
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 42,
+  "tags": [
+    "hyperliquid",
+    "trading",
+    "profit"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": true,
+          "text": "60",
+          "value": "60"
+        },
+        "description": "Window size for moving averages in seconds",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Window Size",
+        "multi": false,
+        "name": "window_seconds",
+        "options": [
+          {
+            "selected": false,
+            "text": "30",
+            "value": "30"
+          },
+          {
+            "selected": true,
+            "text": "60",
+            "value": "60"
+          },
+          {
+            "selected": false,
+            "text": "120",
+            "value": "120"
+          },
+          {
+            "selected": false,
+            "text": "300",
+            "value": "300"
+          },
+          {
+            "selected": false,
+            "text": "600",
+            "value": "600"
+          },
+          {
+            "selected": false,
+            "text": "1800",
+            "value": "1800"
+          }
+        ],
+        "query": "30,60,120,300,600,1800",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Active Trades Dashboard",
+  "uid": "active-trades-v1",
+  "version": 7
+}

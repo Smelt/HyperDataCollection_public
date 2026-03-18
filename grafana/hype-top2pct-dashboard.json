@@ -1,0 +1,448 @@
+{
+  "id": 41,
+  "panels": [
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "displayName": "Min Size (HYPE)",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "purple",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "value",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ]
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT ROUND(MIN(total_size), 0) as threshold FROM hype_top2pct_analysis",
+          "refId": "A"
+        }
+      ],
+      "title": "Top 2% Threshold",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "displayName": "Large Orders",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ]
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) as events FROM hype_top2pct_analysis",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Events",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "displayName": "Seconds",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "orange",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ]
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT ROUND(AVG(secs_to_next_trade), 0) as avg_secs FROM hype_top2pct_analysis WHERE secs_to_next_trade IS NOT NULL",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg Time to Next Trade",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "displayName": "Impact (bps)",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "yellow",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ]
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT ROUND(AVG(ABS(impact_bps)), 2) as impact FROM hype_top2pct_analysis WHERE impact_bps IS NOT NULL",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg Immediate Impact",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Win_Rate_Pct"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Expected_Value_bps"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "green",
+                      "value": 0
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
+      "id": 5,
+      "options": {
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT \n  CASE side WHEN 'B' THEN 'Fade BUY takers' ELSE 'Fade SELL takers' END as Strategy,\n  SUM(CASE WHEN price_end_1m IS NOT NULL THEN 1 ELSE 0 END) as Events,\n  ROUND(AVG(total_size), 0) as Avg_Size,\n  ROUND(AVG(impact_bps), 2) as Immediate_Impact_bps,\n  ROUND(100.0 * SUM(did_revert_1m) / NULLIF(SUM(CASE WHEN did_revert_1m IS NOT NULL THEN 1 END), 0), 1) as Win_Rate_Pct,\n  ROUND(AVG(CASE WHEN did_revert_1m = 1 THEN ABS(change_1m_bps) END), 2) as Avg_Win_bps,\n  ROUND(AVG(CASE WHEN did_revert_1m = 0 THEN ABS(change_1m_bps) END), 2) as Avg_Loss_bps,\n  ROUND(\n    (SUM(did_revert_1m) / NULLIF(SUM(CASE WHEN did_revert_1m IS NOT NULL THEN 1 END), 0)) * \n    AVG(CASE WHEN did_revert_1m = 1 THEN ABS(change_1m_bps) END) -\n    (1 - SUM(did_revert_1m) / NULLIF(SUM(CASE WHEN did_revert_1m IS NOT NULL THEN 1 END), 0)) *\n    AVG(CASE WHEN did_revert_1m = 0 THEN ABS(change_1m_bps) END)\n  , 2) as Expected_Value_bps\nFROM hype_top2pct_analysis\nGROUP BY side\nORDER BY side DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "1-Minute Reversion Analysis by Side",
+      "type": "table"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 50
+              },
+              {
+                "color": "green",
+                "value": 60
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 10
+      },
+      "id": 6,
+      "options": {
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT \n  CASE side WHEN 'B' THEN 'Fade BUY' ELSE 'Fade SELL' END as strategy,\n  ROUND(100.0 * SUM(did_revert_1m) / NULLIF(SUM(CASE WHEN did_revert_1m IS NOT NULL THEN 1 END), 0), 1) as win_rate\nFROM hype_top2pct_analysis\nGROUP BY side",
+          "refId": "A"
+        }
+      ],
+      "title": "Win Rate: Fade SELL vs Fade BUY",
+      "type": "gauge"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 10
+      },
+      "id": 7,
+      "options": {
+        "bucketSize": 30
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT secs_to_next_trade as seconds FROM hype_top2pct_analysis WHERE secs_to_next_trade IS NOT NULL AND secs_to_next_trade < 400",
+          "refId": "A"
+        }
+      ],
+      "title": "Problem: Time to Next Trade",
+      "type": "histogram"
+    },
+    {
+      "fieldConfig": {
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Fade_Result"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "WIN": {
+                        "color": "green",
+                        "text": "WIN"
+                      }
+                    },
+                    "type": "value"
+                  },
+                  {
+                    "options": {
+                      "LOSS": {
+                        "color": "red",
+                        "text": "LOSS"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "id": 8,
+      "options": {
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT \n  FROM_UNIXTIME(event_end_ts/1000) as Time,\n  CASE side WHEN 'B' THEN 'BUY' ELSE 'SELL' END as Taker,\n  ROUND(total_size, 0) as Size_HYPE,\n  ROUND(exec_price, 4) as Exec_Price,\n  ROUND(next_trade_price, 4) as Next_Trade,\n  impact_bps as Impact_bps,\n  secs_to_next_trade as Secs_to_Next,\n  ROUND(price_end_1m, 4) as Price_1min,\n  change_1m_bps as Change_1m_bps,\n  CASE did_revert_1m WHEN 1 THEN 'WIN' WHEN 0 THEN 'LOSS' ELSE '--' END as Fade_Result\nFROM hype_top2pct_analysis\nORDER BY event_end_ts DESC\nLIMIT 30",
+          "refId": "A"
+        }
+      ],
+      "title": "Recent Top 2% Orders",
+      "type": "table"
+    },
+    {
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
+      "id": 9,
+      "options": {
+        "content": "## Key Finding: HYPE Trades Too Infrequently\n\n**The Problem**: After a large order, the average time to the next trade is **~130 seconds** (2+ minutes). This means:\n- You can't quickly enter a fade position\n- By the time the next trade happens, the \"reversion window\" may have passed\n- Only ~60% of large orders have a trade within 1 minute to measure\n\n**Implication**: Even if reversion exists, it's not actionable on HYPE due to low liquidity/frequency.",
+        "mode": "markdown"
+      },
+      "title": "Key Finding",
+      "type": "text"
+    }
+  ],
+  "refresh": "5m",
+  "schemaVersion": 38,
+  "tags": [
+    "trading",
+    "reversion",
+    "hype",
+    "top2pct"
+  ],
+  "time": {
+    "from": "now-9d",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "HYPE Top 2% Trades - Reversion Analysis",
+  "uid": "hype-top2pct-reversion",
+  "version": 2
+}

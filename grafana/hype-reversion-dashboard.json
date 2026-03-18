@@ -1,0 +1,544 @@
+{
+  "id": 40,
+  "panels": [
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "displayName": "Large Order Events",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) as total_events FROM hype_reversion_analysis",
+          "refId": "A"
+        }
+      ],
+      "title": "Summary: Large Taker Orders (Top 5%)",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "displayName": "Reversion Rate",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 50
+              },
+              {
+                "color": "green",
+                "value": 55
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT ROUND(100.0 * SUM(did_revert_5m) / COUNT(CASE WHEN price_end_5m IS NOT NULL THEN 1 END), 1) as reversion_rate FROM hype_reversion_analysis",
+          "refId": "A"
+        }
+      ],
+      "title": "Overall Reversion Rate (5min)",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "displayName": "Avg Reversion (bps)",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "yellow",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "none"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT ROUND(AVG(ABS(change_5m_bps)), 2) as avg_reversion FROM hype_reversion_analysis WHERE did_revert_5m = 1 AND price_end_5m IS NOT NULL",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg Reversion (when correct)",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "displayName": "Threshold (HYPE)",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "purple",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT ROUND(MIN(total_size), 0) as min_size FROM hype_reversion_analysis",
+          "refId": "A"
+        }
+      ],
+      "title": "Min Order Size (Top 5%)",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Reversion_Pct"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Avg_Change_bps"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "none"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 4
+      },
+      "id": 5,
+      "options": {
+        "footer": {
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT \n  CASE side WHEN 'B' THEN 'BUY (taker)' ELSE 'SELL (taker)' END as Side,\n  COUNT(*) as Events,\n  ROUND(AVG(total_size), 0) as Avg_Size,\n  ROUND(100.0 * SUM(did_revert_5m) / NULLIF(COUNT(CASE WHEN price_end_5m IS NOT NULL THEN 1 END), 0), 1) as Reversion_Pct,\n  ROUND(AVG(change_5m_bps), 2) as Avg_Change_bps,\n  CASE side WHEN 'B' THEN 'Price drops after' ELSE 'Price rises after' END as Expected_Reversion\nFROM hype_reversion_analysis\nGROUP BY side\nORDER BY side",
+          "refId": "A"
+        }
+      ],
+      "title": "Reversion by Side (Buy vs Sell Takers)",
+      "type": "table"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "max": 100,
+          "min": 0,
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 4
+      },
+      "id": 6,
+      "options": {
+        "barWidth": 0.8,
+        "colorByField": "Size_Bucket",
+        "orientation": "horizontal",
+        "showValue": "always",
+        "xField": "Size_Bucket"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT \n  size_bucket as Size_Bucket,\n  ROUND(100.0 * SUM(did_revert_5m) / NULLIF(COUNT(CASE WHEN price_end_5m IS NOT NULL THEN 1 END), 0), 1) as Reversion_Rate\nFROM hype_reversion_analysis\nGROUP BY size_bucket\nORDER BY \n  CASE size_bucket \n    WHEN '201-300' THEN 1 \n    WHEN '300-500' THEN 2 \n    WHEN '500-1000' THEN 3 \n    WHEN '1000+' THEN 4 \n  END",
+          "refId": "A"
+        }
+      ],
+      "title": "Reversion by Order Size",
+      "type": "barchart"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Reversion_Pct"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Expected_Value_bps"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "green",
+                      "value": 0
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "id": 7,
+      "options": {
+        "footer": {
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT \n  CASE side WHEN 'B' THEN 'BUY' ELSE 'SELL' END as Side,\n  size_bucket as Size_Bucket,\n  COUNT(*) as Events,\n  ROUND(AVG(total_size), 0) as Avg_Size_HYPE,\n  ROUND(100.0 * SUM(did_revert_5m) / NULLIF(COUNT(CASE WHEN price_end_5m IS NOT NULL THEN 1 END), 0), 1) as Reversion_Pct,\n  ROUND(AVG(CASE WHEN did_revert_5m = 1 THEN ABS(change_5m_bps) END), 2) as Avg_Profit_bps,\n  ROUND(AVG(CASE WHEN did_revert_5m = 0 AND price_end_5m IS NOT NULL THEN ABS(change_5m_bps) END), 2) as Avg_Loss_bps,\n  ROUND(\n    (AVG(CASE WHEN did_revert_5m = 1 THEN ABS(change_5m_bps) END) * SUM(did_revert_5m) - \n     AVG(CASE WHEN did_revert_5m = 0 AND price_end_5m IS NOT NULL THEN ABS(change_5m_bps) END) * \n     SUM(CASE WHEN did_revert_5m = 0 AND price_end_5m IS NOT NULL THEN 1 ELSE 0 END)) / \n    NULLIF(COUNT(CASE WHEN price_end_5m IS NOT NULL THEN 1 END), 0), 2\n  ) as Expected_Value_bps\nFROM hype_reversion_analysis\nGROUP BY side, size_bucket\nORDER BY side, \n  CASE size_bucket \n    WHEN '201-300' THEN 1 \n    WHEN '300-500' THEN 2 \n    WHEN '500-1000' THEN 3 \n    WHEN '1000+' THEN 4 \n  END",
+          "refId": "A"
+        }
+      ],
+      "title": "Detailed Breakdown by Side & Size",
+      "type": "table"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Reverted"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "YES": {
+                        "color": "green",
+                        "text": "YES"
+                      }
+                    },
+                    "type": "value"
+                  },
+                  {
+                    "options": {
+                      "NO": {
+                        "color": "red",
+                        "text": "NO"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Change_bps"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "green",
+                      "value": 0
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "id": 8,
+      "options": {
+        "footer": {
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT \n  FROM_UNIXTIME(timestamp/1000) as Time,\n  CASE side WHEN 'B' THEN 'BUY' ELSE 'SELL' END as Side,\n  ROUND(total_size, 0) as Size_HYPE,\n  ROUND(exec_price, 4) as Exec_Price,\n  ROUND(price_end_5m, 4) as Price_5min_Later,\n  change_5m_bps as Change_bps,\n  CASE did_revert_5m WHEN 1 THEN 'YES' ELSE 'NO' END as Reverted,\n  CASE \n    WHEN did_revert_5m = 1 THEN CONCAT('+', ABS(change_5m_bps), ' bps')\n    WHEN price_end_5m IS NULL THEN 'No data'\n    ELSE CONCAT('-', ABS(change_5m_bps), ' bps')\n  END as PnL_if_Faded\nFROM hype_reversion_analysis\nWHERE price_end_5m IS NOT NULL\nORDER BY timestamp DESC\nLIMIT 50",
+          "refId": "A"
+        }
+      ],
+      "title": "Recent Large Orders (Last 50)",
+      "type": "table"
+    },
+    {
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 28
+      },
+      "id": 9,
+      "options": {
+        "content": "## Mean Reversion Strategy Analysis for HYPE\n\n**Hypothesis**: After large taker orders (top 5% by size), the price tends to revert partially.\n\n**How it works**:\n- **Large BUY taker** = aggressive buyer hits asks, pushes price UP temporarily\n  - If price reverts (goes back DOWN), the fade would profit\n- **Large SELL taker** = aggressive seller hits bids, pushes price DOWN temporarily  \n  - If price reverts (goes back UP), the fade would profit\n\n**Key Metrics**:\n- **Reversion Rate**: % of large orders where price moved in favorable direction within 5 minutes\n- **Expected Value (EV)**: Average profit per trade if you faded every large order\n- **Positive EV** = profitable strategy over time",
+        "mode": "markdown"
+      },
+      "title": "Strategy Summary",
+      "type": "text"
+    }
+  ],
+  "refresh": "5m",
+  "schemaVersion": 38,
+  "tags": [
+    "trading",
+    "reversion",
+    "hype"
+  ],
+  "time": {
+    "from": "now-9d",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ]
+  },
+  "timezone": "browser",
+  "title": "HYPE Price Reversion Analysis",
+  "uid": "hype-reversion-analysis",
+  "version": 3
+}

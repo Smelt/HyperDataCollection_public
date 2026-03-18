@@ -1,0 +1,1872 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 45,
+  "links": [],
+  "panels": [
+    {
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 100,
+      "title": "Summary Statistics",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 1
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(DISTINCT oid) as value FROM user_trades WHERE time >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND time <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND oid IS NOT NULL AND ('${exclude_currency:raw}' = '$__all' OR coin NOT IN (${exclude_currency:sqlstring}))",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Orders",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 10
+              },
+              {
+                "color": "orange",
+                "value": 15
+              },
+              {
+                "color": "red",
+                "value": 20
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 1
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT ROUND(100.0 * SUM(CASE WHEN fill_count > 1 THEN 1 ELSE 0 END) / COUNT(*), 1) as value FROM (SELECT oid, COUNT(*) as fill_count FROM user_trades WHERE time >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND time <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND oid IS NOT NULL AND ('${exclude_currency:raw}' = '$__all' OR coin NOT IN (${exclude_currency:sqlstring})) GROUP BY oid) as order_fills",
+          "refId": "A"
+        }
+      ],
+      "title": "Partial Fill Rate",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "orange",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 1
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT SUM(CASE WHEN fill_count > 1 THEN 1 ELSE 0 END) as value FROM (SELECT oid, COUNT(*) as fill_count FROM user_trades WHERE time >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND time <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND oid IS NOT NULL AND ('${exclude_currency:raw}' = '$__all' OR coin NOT IN (${exclude_currency:sqlstring})) GROUP BY oid) as order_fills",
+          "refId": "A"
+        }
+      ],
+      "title": "Partial Fill Orders",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "purple",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 1
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT ROUND(AVG(fill_count), 2) as value FROM (SELECT oid, COUNT(*) as fill_count FROM user_trades WHERE time >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND time <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND oid IS NOT NULL AND ('${exclude_currency:raw}' = '$__all' OR coin NOT IN (${exclude_currency:sqlstring})) GROUP BY oid HAVING COUNT(*) > 1) as partial_fills",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg Fills (Partials)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "semi-dark-blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 1
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT ROUND(AVG(total_notional), 2) as value FROM (SELECT oid, SUM(sz * px) as total_notional FROM user_trades WHERE time >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND time <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND oid IS NOT NULL AND ('${exclude_currency:raw}' = '$__all' OR coin NOT IN (${exclude_currency:sqlstring})) GROUP BY oid) as order_fills",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg Order Size",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "1 Fill"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "2 Fills"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "3+ Fills"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 4,
+        "x": 20,
+        "y": 1
+      },
+      "id": 6,
+      "options": {
+        "displayLabels": [
+          "name",
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true,
+          "values": []
+        },
+        "pieType": "donut",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT SUM(CASE WHEN fill_count = 1 THEN 1 ELSE 0 END) as `1 Fill`, SUM(CASE WHEN fill_count = 2 THEN 1 ELSE 0 END) as `2 Fills`, SUM(CASE WHEN fill_count >= 3 THEN 1 ELSE 0 END) as `3+ Fills` FROM (SELECT oid, COUNT(*) as fill_count FROM user_trades WHERE time >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND time <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND oid IS NOT NULL AND ('${exclude_currency:raw}' = '$__all' OR coin NOT IN (${exclude_currency:sqlstring})) GROUP BY oid) as order_fills",
+          "refId": "A"
+        }
+      ],
+      "title": "Fill Distribution",
+      "type": "piechart"
+    },
+    {
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "id": 101,
+      "title": "Partial Fill Analysis by Currency",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Partial_Pct"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge",
+                  "valueDisplayMode": "text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 8
+                    },
+                    {
+                      "color": "red",
+                      "value": 15
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "max",
+                "value": 25
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Avg_Notional_USD"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Total_Orders"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge",
+                  "valueDisplayMode": "text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "continuous-BlPu"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 6
+      },
+      "id": 10,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Total_Orders"
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT coin as Currency, COUNT(DISTINCT oid) as Total_Orders, SUM(CASE WHEN fill_count > 1 THEN 1 ELSE 0 END) as Partial_Fills, ROUND(SUM(CASE WHEN fill_count > 1 THEN 1 ELSE 0 END) / COUNT(DISTINCT oid) * 100, 1) as Partial_Pct, ROUND(AVG(total_notional), 2) as Avg_Notional_USD FROM (SELECT oid, coin, COUNT(*) as fill_count, SUM(sz * px) as total_notional FROM user_trades WHERE time >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND time <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND oid IS NOT NULL AND ('${exclude_currency:raw}' = '$__all' OR coin NOT IN (${exclude_currency:sqlstring})) GROUP BY oid, coin) as order_fills GROUP BY coin ORDER BY Total_Orders DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Partial Fill Summary by Currency",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "hue",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 10
+              },
+              {
+                "color": "red",
+                "value": 15
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 6
+      },
+      "id": 11,
+      "options": {
+        "barRadius": 0.1,
+        "barWidth": 0.7,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "orientation": "horizontal",
+        "showValue": "always",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT coin as Currency, ROUND(SUM(CASE WHEN fill_count > 1 THEN 1 ELSE 0 END) / COUNT(DISTINCT oid) * 100, 1) as `Partial Fill Rate` FROM (SELECT oid, coin, COUNT(*) as fill_count FROM user_trades WHERE time >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND time <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND oid IS NOT NULL AND ('${exclude_currency:raw}' = '$__all' OR coin NOT IN (${exclude_currency:sqlstring})) GROUP BY oid, coin) as order_fills GROUP BY coin ORDER BY `Partial Fill Rate` DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Partial Fill Rate by Currency (%)",
+      "type": "barchart"
+    },
+    {
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "id": 102,
+      "title": "Leftover Analysis (When Partial Fills Occur)",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "First_Fill_USD"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Leftover_USD"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge",
+                  "valueDisplayMode": "text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "continuous-RdYlGr"
+                }
+              },
+              {
+                "id": "max",
+                "value": 50
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Leftover_Pct"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge",
+                  "valueDisplayMode": "text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "continuous-RdYlGr"
+                }
+              },
+              {
+                "id": "max",
+                "value": 100
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Avg_Total_USD"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 15
+      },
+      "id": 20,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Partial_Orders"
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT coin as Currency, COUNT(*) as Partial_Orders, ROUND(AVG(first_fill_notional), 2) as First_Fill_USD, ROUND(AVG(total_notional), 2) as Avg_Total_USD, ROUND(AVG(leftover_notional), 2) as Leftover_USD, ROUND(AVG(leftover_notional / total_notional * 100), 1) as Leftover_Pct FROM (SELECT oid, coin, COUNT(*) as fill_count, SUM(sz * px) as total_notional, MIN(sz * px) as first_fill_notional, SUM(sz * px) - MIN(sz * px) as leftover_notional FROM user_trades WHERE time >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND time <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND oid IS NOT NULL AND ('${exclude_currency:raw}' = '$__all' OR coin NOT IN (${exclude_currency:sqlstring})) GROUP BY oid, coin HAVING COUNT(*) > 1) as partial_fills GROUP BY coin ORDER BY Partial_Orders DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Leftover Analysis by Currency",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "USD",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "hue",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 2,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "First Fill"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Leftover"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 15
+      },
+      "id": 21,
+      "options": {
+        "barRadius": 0.1,
+        "barWidth": 0.7,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "horizontal",
+        "showValue": "always",
+        "stacking": "normal",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT coin as Currency, ROUND(AVG(first_fill_notional), 2) as `First Fill`, ROUND(AVG(leftover_notional), 2) as `Leftover` FROM (SELECT oid, coin, SUM(sz * px) as total_notional, MIN(sz * px) as first_fill_notional, SUM(sz * px) - MIN(sz * px) as leftover_notional FROM user_trades WHERE time >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND time <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND oid IS NOT NULL AND ('${exclude_currency:raw}' = '$__all' OR coin NOT IN (${exclude_currency:sqlstring})) GROUP BY oid, coin HAVING COUNT(*) > 1) as partial_fills GROUP BY coin ORDER BY AVG(leftover_notional) DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "First Fill vs Leftover (Stacked)",
+      "type": "barchart"
+    },
+    {
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 23
+      },
+      "id": 103,
+      "title": "Order Size Impact Analysis",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Partial Fill Rate (%)",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "hue",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 10
+              },
+              {
+                "color": "red",
+                "value": 20
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 24
+      },
+      "id": 30,
+      "options": {
+        "barRadius": 0.1,
+        "barWidth": 0.7,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "orientation": "vertical",
+        "showValue": "always",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT CASE WHEN total_notional < 20 THEN '<$20' WHEN total_notional < 30 THEN '$20-30' WHEN total_notional < 40 THEN '$30-40' WHEN total_notional < 50 THEN '$40-50' WHEN total_notional < 60 THEN '$50-60' ELSE '>$60' END as `Size Bracket`, ROUND(SUM(CASE WHEN fill_count > 1 THEN 1 ELSE 0 END) / COUNT(*) * 100, 1) as `Partial Fill Rate` FROM (SELECT oid, COUNT(*) as fill_count, SUM(sz * px) as total_notional FROM user_trades WHERE time >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND time <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND oid IS NOT NULL AND ('${exclude_currency:raw}' = '$__all' OR coin NOT IN (${exclude_currency:sqlstring})) GROUP BY oid) as order_fills GROUP BY CASE WHEN total_notional < 20 THEN '<$20' WHEN total_notional < 30 THEN '$20-30' WHEN total_notional < 40 THEN '$30-40' WHEN total_notional < 50 THEN '$40-50' WHEN total_notional < 60 THEN '$50-60' ELSE '>$60' END ORDER BY CASE `Size Bracket` WHEN '<$20' THEN 1 WHEN '$20-30' THEN 2 WHEN '$30-40' THEN 3 WHEN '$40-50' THEN 4 WHEN '$50-60' THEN 5 ELSE 6 END",
+          "refId": "A"
+        }
+      ],
+      "title": "Partial Fill Rate by Order Size",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Orders",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "hue",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Full Fills"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Partial Fills"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 24
+      },
+      "id": 31,
+      "options": {
+        "barRadius": 0.1,
+        "barWidth": 0.7,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "vertical",
+        "showValue": "auto",
+        "stacking": "normal",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT CASE WHEN total_notional < 20 THEN '<$20' WHEN total_notional < 30 THEN '$20-30' WHEN total_notional < 40 THEN '$30-40' WHEN total_notional < 50 THEN '$40-50' WHEN total_notional < 60 THEN '$50-60' ELSE '>$60' END as `Size Bracket`, SUM(CASE WHEN fill_count = 1 THEN 1 ELSE 0 END) as `Full Fills`, SUM(CASE WHEN fill_count > 1 THEN 1 ELSE 0 END) as `Partial Fills` FROM (SELECT oid, COUNT(*) as fill_count, SUM(sz * px) as total_notional FROM user_trades WHERE time >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND time <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND oid IS NOT NULL AND ('${exclude_currency:raw}' = '$__all' OR coin NOT IN (${exclude_currency:sqlstring})) GROUP BY oid) as order_fills GROUP BY CASE WHEN total_notional < 20 THEN '<$20' WHEN total_notional < 30 THEN '$20-30' WHEN total_notional < 40 THEN '$30-40' WHEN total_notional < 50 THEN '$40-50' WHEN total_notional < 60 THEN '$50-60' ELSE '>$60' END ORDER BY CASE `Size Bracket` WHEN '<$20' THEN 1 WHEN '$20-30' THEN 2 WHEN '$30-40' THEN 3 WHEN '$40-50' THEN 4 WHEN '$50-60' THEN 5 ELSE 6 END",
+          "refId": "A"
+        }
+      ],
+      "title": "Order Count by Size (Full vs Partial)",
+      "type": "barchart"
+    },
+    {
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 32
+      },
+      "id": 104,
+      "title": "Market Trade Size Percentiles (Reference)",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Trades"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge",
+                  "valueDisplayMode": "text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "continuous-BlPu"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Volume"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "P25"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "basic",
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "P50"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "basic",
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "P75"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "basic",
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 33
+      },
+      "id": 40,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Trades"
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT pair as Currency, COUNT(*) as Trades, ROUND(SUM(notional_usd), 0) as Volume, ROUND(MAX(CASE WHEN pct_rank <= 0.25 THEN notional_usd ELSE 0 END), 2) as P25, ROUND(MAX(CASE WHEN pct_rank <= 0.50 THEN notional_usd ELSE 0 END), 2) as P50, ROUND(MAX(CASE WHEN pct_rank <= 0.75 THEN notional_usd ELSE 0 END), 2) as P75 FROM (SELECT pair, notional_usd, PERCENT_RANK() OVER (PARTITION BY pair ORDER BY notional_usd) as pct_rank FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000) ranked GROUP BY pair ORDER BY Trades DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Market Trade Size Percentiles (P25/P50/P75)",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 15,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 33
+      },
+      "id": 41,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT FROM_UNIXTIME(FLOOR(time/1000/3600)*3600) as time, coin as metric, ROUND(100.0 * SUM(CASE WHEN fill_count > 1 THEN 1 ELSE 0 END) / COUNT(*), 1) as value FROM (SELECT oid, coin, MIN(time) as time, COUNT(*) as fill_count FROM user_trades WHERE time >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND time <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND oid IS NOT NULL AND ('${exclude_currency:raw}' = '$__all' OR coin NOT IN (${exclude_currency:sqlstring})) GROUP BY oid, coin) as order_fills GROUP BY FLOOR(time/1000/3600), coin HAVING COUNT(*) >= 5 ORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "title": "Partial Fill Rate Over Time (Hourly)",
+      "type": "timeseries"
+    },
+    {
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 41
+      },
+      "id": 105,
+      "title": "API Impact Analysis",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 42
+      },
+      "id": 50,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) as value FROM user_trades WHERE time >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND time <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND oid IS NOT NULL AND ('${exclude_currency:raw}' = '$__all' OR coin NOT IN (${exclude_currency:sqlstring}))",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Fills",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "orange",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 42
+      },
+      "id": 51,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) - COUNT(DISTINCT oid) as value FROM user_trades WHERE time >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND time <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND oid IS NOT NULL AND ('${exclude_currency:raw}' = '$__all' OR coin NOT IN (${exclude_currency:sqlstring}))",
+          "refId": "A"
+        }
+      ],
+      "title": "Extra Fills (from Partials)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 5
+              },
+              {
+                "color": "red",
+                "value": 10
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 42
+      },
+      "id": 52,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT ROUND(100.0 * (COUNT(*) - COUNT(DISTINCT oid)) / COUNT(DISTINCT oid), 1) as value FROM user_trades WHERE time >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND time <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND oid IS NOT NULL AND ('${exclude_currency:raw}' = '$__all' OR coin NOT IN (${exclude_currency:sqlstring}))",
+          "refId": "A"
+        }
+      ],
+      "title": "API Overhead %",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "description": "Estimated additional API requests due to partial fills (1 extra request per extra fill)",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "purple",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 42
+      },
+      "id": 53,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT ROUND((COUNT(*) - COUNT(DISTINCT oid)) / (TIMESTAMPDIFF(HOUR, FROM_UNIXTIME(UNIX_TIMESTAMP($__timeFrom())), FROM_UNIXTIME(UNIX_TIMESTAMP($__timeTo()))) + 1), 1) as value FROM user_trades WHERE time >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND time <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND oid IS NOT NULL AND ('${exclude_currency:raw}' = '$__all' OR coin NOT IN (${exclude_currency:sqlstring}))",
+          "refId": "A"
+        }
+      ],
+      "title": "Extra Fills/Hour",
+      "type": "stat"
+    }
+  ],
+  "preload": false,
+  "refresh": "30s",
+  "schemaVersion": 42,
+  "tags": [
+    "hyperliquid",
+    "trading",
+    "execution",
+    "partial-fills"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "mysql",
+          "uid": "ef1n1ggi71xq8d"
+        },
+        "definition": "SELECT DISTINCT coin FROM user_trades WHERE time >= UNIX_TIMESTAMP(NOW() - INTERVAL 7 DAY) * 1000 ORDER BY coin",
+        "description": "Exclude selected currencies from statistics",
+        "includeAll": true,
+        "label": "Exclude Currency",
+        "multi": true,
+        "name": "exclude_currency",
+        "options": [],
+        "query": "SELECT DISTINCT coin FROM user_trades WHERE time >= UNIX_TIMESTAMP(NOW() - INTERVAL 7 DAY) * 1000 ORDER BY coin",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Order Execution & Partial Fill Analysis v2",
+  "uid": "partial-fill-analysis-v2",
+  "version": 5
+}

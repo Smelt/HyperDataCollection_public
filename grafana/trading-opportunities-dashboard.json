@@ -1,0 +1,334 @@
+{
+  "id": 24,
+  "panels": [
+    {
+      "fieldConfig": {
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Profit After Fees (bps)"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "continuous-GrYlRd"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT pair, AVG(avg_spread_bps) as avg_spread_bps, AVG(avg_spread_bps)/100 as avg_spread_pct, (AVG(avg_spread_bps) - 3.0) as profit_bps, STDDEV(avg_spread_bps)/100 as volatility, MIN(min_spread_bps)/100 as min_spread, MAX(max_spread_bps)/100 as max_spread, SUM(sample_count) as samples, AVG(avg_bid_size + avg_ask_size) as avg_liquidity FROM spread_snapshots_1min WHERE timestamp >= $__timeFrom() AND timestamp <= $__timeTo() GROUP BY pair HAVING avg_spread_bps > 3.0 ORDER BY profit_bps DESC LIMIT 30",
+          "refId": "A"
+        }
+      ],
+      "title": "Best Opportunities After Fees (1.5 bps maker fee)",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "avg_liquidity": "Avg Liquidity",
+              "avg_spread_bps": "Avg Spread (bps)",
+              "avg_spread_pct": "Avg Spread %",
+              "max_spread": "Max %",
+              "min_spread": "Min %",
+              "pair": "Pair",
+              "profit_bps": "Profit After Fees (bps)",
+              "samples": "Samples",
+              "volatility": "Volatility"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-BlYlRd"
+          },
+          "decimals": 1,
+          "max": 100,
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 10
+      },
+      "id": 2,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "showUnfilled": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT pair, (STDDEV(avg_spread_bps)/100 / AVG(avg_spread_bps)/100) * 100 as consistency_score FROM spread_snapshots_1min WHERE timestamp >= $__timeFrom() AND timestamp <= $__timeTo() GROUP BY pair HAVING AVG(avg_spread_bps) > 5.0 ORDER BY consistency_score ASC LIMIT 15",
+          "refId": "A"
+        }
+      ],
+      "title": "Spread Consistency Score (Lower = More Consistent)",
+      "type": "bargauge"
+    },
+    {
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 10
+      },
+      "id": 3,
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT pair, (AVG(avg_spread_bps) - 3.0) as profit_after_fees, STDDEV(avg_spread_bps)/100 * 100 as volatility, AVG(avg_bid_size + avg_ask_size) as avg_liquidity FROM spread_snapshots_1min WHERE timestamp >= $__timeFrom() AND timestamp <= $__timeTo() GROUP BY pair HAVING profit_after_fees > 0 ORDER BY profit_after_fees DESC LIMIT 30",
+          "refId": "A"
+        }
+      ],
+      "title": "Profitability vs Volatility (Bubble Size = Liquidity)",
+      "type": "graph",
+      "xaxis": {
+        "mode": "series",
+        "values": [
+          "profit_after_fees"
+        ]
+      },
+      "yaxes": [
+        {
+          "format": "percent",
+          "label": "Volatility %"
+        }
+      ]
+    },
+    {
+      "color": {
+        "mode": "spectrum",
+        "scheme": "Greens"
+      },
+      "dataFormat": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "id": 4,
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "time_series",
+          "rawSql": "SELECT FROM_UNIXTIME(timestamp/1000) as time, pair, AVG(avg_spread_bps) as avg_spread FROM spread_snapshots_1min WHERE timestamp >= $__timeFrom() AND timestamp <= $__timeTo() AND pair IN (SELECT pair FROM spread_snapshots_1min WHERE timestamp >= $__timeFrom() AND timestamp <= $__timeTo() GROUP BY pair ORDER BY AVG(avg_spread_bps) DESC LIMIT 10) GROUP BY HOUR(FROM_UNIXTIME(timestamp/1000)), pair ORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "title": "Time-of-Day Spread Patterns (Best Trading Hours)",
+      "type": "heatmap"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": true
+          },
+          "decimals": 3,
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
+      "id": 5,
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "time_series",
+          "rawSql": "SELECT FROM_UNIXTIME(timestamp/1000) as time, pair, AVG(avg_spread_bps)/100 as avg_spread FROM spread_snapshots_1min WHERE timestamp >= $__timeFrom() AND timestamp <= $__timeTo() AND pair IN (SELECT pair FROM spread_snapshots_1min WHERE timestamp >= $__timeFrom() AND timestamp <= $__timeTo() GROUP BY pair ORDER BY AVG(avg_spread_bps) DESC LIMIT 10) GROUP BY FROM_UNIXTIME(timestamp/1000 DIV 300 * 300), pair ORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "title": "Spread Trends for Top 10 Pairs (Last 24h)",
+      "type": "timeseries"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 2,
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 34
+      },
+      "id": 6,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value_and_name"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT pair, (spread_bps - 3.0) as profit_bps FROM spread_snapshots WHERE timestamp = (SELECT MAX(timestamp) FROM spread_snapshots) ORDER BY profit_bps DESC LIMIT 1",
+          "refId": "A"
+        }
+      ],
+      "title": "Highest Profit Opportunity Right Now",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 2,
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 34
+      },
+      "id": 7,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT AVG(spread_bps - 3.0) as avg_profit FROM spread_snapshots_1min WHERE timestamp >= $__timeFrom() AND timestamp <= $__timeTo() AND spread_bps > 3.0",
+          "refId": "A"
+        }
+      ],
+      "title": "Average Profitability (All Pairs)",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 34
+      },
+      "id": 8,
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT COUNT(DISTINCT pair) as profitable_pairs FROM spread_snapshots_1min WHERE timestamp >= $__timeFrom() AND timestamp <= $__timeTo() AND spread_bps > 3.0",
+          "refId": "A"
+        }
+      ],
+      "title": "Profitable Pairs Count",
+      "type": "stat"
+    },
+    {
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 34
+      },
+      "id": 9,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value_and_name"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT pair, (STDDEV(avg_spread_bps)/100 / AVG(avg_spread_bps)/100) * 100 as consistency FROM spread_snapshots_1min WHERE timestamp >= $__timeFrom() AND timestamp <= $__timeTo() GROUP BY pair HAVING AVG(avg_spread_bps) > 5.0 ORDER BY consistency ASC LIMIT 1",
+          "refId": "A"
+        }
+      ],
+      "title": "Most Consistent Pair (24h)",
+      "type": "stat"
+    }
+  ],
+  "refresh": "1m",
+  "schemaVersion": 16,
+  "tags": [
+    "hyperliquid",
+    "trading",
+    "opportunities"
+  ],
+  "timezone": "browser",
+  "title": "Hyperliquid Trading Opportunities",
+  "uid": "885b2e95-e9df-465a-980c-71dce1dfd939",
+  "version": 2
+}

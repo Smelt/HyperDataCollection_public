@@ -1,0 +1,1278 @@
+{
+  "description": "Market analysis with personal trading metrics",
+  "id": 38,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 100,
+      "title": "\ud83d\udcca MY TRADING",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 100
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 1
+      },
+      "id": 101,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT ROUND(COALESCE(SUM(notional_usd), 0), 0) as value FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND (LOWER(buyer) = LOWER('${my_wallet}') OR LOWER(seller) = LOWER('${my_wallet}')) AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring}))",
+          "refId": "A"
+        }
+      ],
+      "title": "My Volume",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "purple",
+                "value": 0
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 4,
+        "y": 1
+      },
+      "id": 102,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) as value FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND (LOWER(buyer) = LOWER('${my_wallet}') OR LOWER(seller) = LOWER('${my_wallet}')) AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring}))",
+          "refId": "A"
+        }
+      ],
+      "title": "My Trades",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "orange",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 7,
+        "y": 1
+      },
+      "id": 103,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT ROUND(COALESCE(AVG(notional_usd), 0), 2) as value FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND (LOWER(buyer) = LOWER('${my_wallet}') OR LOWER(seller) = LOWER('${my_wallet}')) AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring}))",
+          "refId": "A"
+        }
+      ],
+      "title": "My Avg Size",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "description": "My volume as % of total market volume",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "green",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 11,
+        "y": 1
+      },
+      "id": 104,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT ROUND(COALESCE(SUM(CASE WHEN LOWER(buyer) = LOWER('${my_wallet}') OR LOWER(seller) = LOWER('${my_wallet}') THEN notional_usd ELSE 0 END) / NULLIF(SUM(notional_usd), 0) * 100, 0), 2) as value FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring}))",
+          "refId": "A"
+        }
+      ],
+      "title": "Market Share",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 15,
+        "y": 1
+      },
+      "id": 105,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT ROUND(COALESCE(SUM(notional_usd), 0), 0) as value FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND LOWER(buyer) = LOWER('${my_wallet}') AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring}))",
+          "refId": "A"
+        }
+      ],
+      "title": "My Buys",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 18,
+        "y": 1
+      },
+      "id": 106,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT ROUND(COALESCE(SUM(notional_usd), 0), 0) as value FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND LOWER(seller) = LOWER('${my_wallet}') AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring}))",
+          "refId": "A"
+        }
+      ],
+      "title": "My Sells",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "description": "My avg size compared to market avg",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "yellow",
+                "value": 0.8
+              },
+              {
+                "color": "green",
+                "value": 1.2
+              }
+            ]
+          },
+          "unit": "x"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 21,
+        "y": 1
+      },
+      "id": 107,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT ROUND(COALESCE((SELECT AVG(notional_usd) FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND (LOWER(buyer) = LOWER('${my_wallet}') OR LOWER(seller) = LOWER('${my_wallet}')) AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring}))) / NULLIF((SELECT AVG(notional_usd) FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring}))), 0), 0), 2) as value",
+          "refId": "A"
+        }
+      ],
+      "title": "Size vs Market",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 70
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Market Volume"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "semi-dark-blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "My Volume"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "semi-dark-green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      },
+      "id": 110,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT FROM_UNIXTIME(FLOOR(timestamp/1000/$interval)*$interval) as time, 'Market Volume' as metric, ROUND(SUM(notional_usd), 2) as value FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring})) GROUP BY FLOOR(timestamp/1000/$interval) ORDER BY time",
+          "refId": "A"
+        },
+        {
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT FROM_UNIXTIME(FLOOR(timestamp/1000/$interval)*$interval) as time, 'My Volume' as metric, ROUND(SUM(notional_usd), 2) as value FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND (LOWER(buyer) = LOWER('${my_wallet}') OR LOWER(seller) = LOWER('${my_wallet}')) AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring})) GROUP BY FLOOR(timestamp/1000/$interval) ORDER BY time",
+          "refId": "B"
+        }
+      ],
+      "title": "My Volume vs Market Volume",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "USD"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "continuous-GrYlRd"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Side"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "BUY": {
+                        "color": "green",
+                        "text": "BUY"
+                      }
+                    },
+                    "type": "value"
+                  },
+                  {
+                    "options": {
+                      "SELL": {
+                        "color": "red",
+                        "text": "SELL"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      },
+      "id": 111,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": true,
+          "show": true
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT FROM_UNIXTIME(timestamp/1000) as Time, pair as Pair, CASE WHEN LOWER(buyer) = LOWER('${my_wallet}') THEN 'BUY' ELSE 'SELL' END as Side, ROUND(notional_usd, 2) as USD, ROUND(size, 4) as Size, ROUND(price, 6) as Price, CASE WHEN LOWER(buyer) = LOWER('${my_wallet}') THEN CONCAT(LEFT(seller, 6), '...') ELSE CONCAT(LEFT(buyer, 6), '...') END as Counterparty FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND (LOWER(buyer) = LOWER('${my_wallet}') OR LOWER(seller) = LOWER('${my_wallet}')) AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring})) ORDER BY timestamp DESC LIMIT 50",
+          "refId": "A"
+        }
+      ],
+      "title": "My Recent Trades",
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 200,
+      "title": "\ud83d\udcc8 MARKET OVERVIEW",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 13
+      },
+      "id": 201,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT ROUND(SUM(notional_usd), 0) as value FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring}))",
+          "refId": "A"
+        }
+      ],
+      "title": "Market Volume",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 4,
+        "y": 13
+      },
+      "id": 202,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) as value FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring}))",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Fills",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "purple",
+                "value": 0
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 7,
+        "y": 13
+      },
+      "id": 203,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(DISTINCT CONCAT(buyer, '-', pair, '-', side, '-', FLOOR(timestamp/1000))) as value FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND buyer IS NOT NULL AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring}))",
+          "refId": "A"
+        }
+      ],
+      "title": "Unique Orders",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "orange",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 11,
+        "y": 13
+      },
+      "id": 204,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH orders AS (SELECT buyer, pair, side, FLOOR(timestamp/1000) as sec, SUM(notional_usd) as order_usd FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND buyer IS NOT NULL AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring})) GROUP BY buyer, pair, side, FLOOR(timestamp/1000)) SELECT ROUND(AVG(order_usd), 2) as value FROM orders",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg Order Size",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "yellow",
+                "value": 0
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 15,
+        "y": 13
+      },
+      "id": 205,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(DISTINCT buyer) as value FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND buyer IS NOT NULL AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring}))",
+          "refId": "A"
+        }
+      ],
+      "title": "Unique Traders",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "semi-dark-blue",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 19,
+        "y": 13
+      },
+      "id": 206,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT ROUND(AVG(notional_usd), 2) as value FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring}))",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg Fill Size",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "unit": "currencyUSD"
+        }
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 17
+      },
+      "id": 210,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT FROM_UNIXTIME(FLOOR(timestamp/1000/$interval)*$interval) as time, pair as metric, ROUND(SUM(notional_usd), 2) as value FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring})) GROUP BY FLOOR(timestamp/1000/$interval), pair ORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "title": "Volume Over Time",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "fillOpacity": 80
+          }
+        }
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 17
+      },
+      "id": 211,
+      "options": {
+        "barWidth": 0.9,
+        "legend": {
+          "displayMode": "hidden"
+        },
+        "orientation": "vertical",
+        "showValue": "always",
+        "xTickLabelRotation": -45
+      },
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH orders AS (SELECT buyer, pair, side, FLOOR(timestamp/1000) as sec, SUM(notional_usd) as order_usd FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND buyer IS NOT NULL AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring})) GROUP BY buyer, pair, side, FLOOR(timestamp/1000)) SELECT CASE WHEN order_usd < 50 THEN '$0-50' WHEN order_usd < 100 THEN '$50-100' WHEN order_usd < 250 THEN '$100-250' WHEN order_usd < 500 THEN '$250-500' WHEN order_usd < 1000 THEN '$500-1K' WHEN order_usd < 2500 THEN '$1K-2.5K' WHEN order_usd < 5000 THEN '$2.5K-5K' ELSE '$5K+' END as size_bucket, COUNT(*) as orders FROM orders GROUP BY size_bucket ORDER BY CASE size_bucket WHEN '$0-50' THEN 1 WHEN '$50-100' THEN 2 WHEN '$100-250' THEN 3 WHEN '$250-500' THEN 4 WHEN '$500-1K' THEN 5 WHEN '$1K-2.5K' THEN 6 WHEN '$2.5K-5K' THEN 7 ELSE 8 END",
+          "refId": "A"
+        }
+      ],
+      "title": "Reconstructed Order Size Distribution",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "TotalVolume"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "displayName",
+                "value": "Total Volume"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "continuous-GrYlRd"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AvgFill"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "displayName",
+                "value": "Avg Fill"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Address"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "pattern": "\u2b50.*",
+                      "result": {
+                        "color": "green"
+                      }
+                    },
+                    "type": "regex"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 24
+      },
+      "id": 220,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT CASE WHEN LOWER(buyer) = LOWER('${my_wallet}') THEN '\u2b50 ME' ELSE CONCAT(LEFT(buyer, 6), '...', RIGHT(buyer, 4)) END as Address, COUNT(DISTINCT CONCAT(pair, '-', side, '-', FLOOR(timestamp/1000))) as Orders, COUNT(*) as Fills, ROUND(SUM(notional_usd), 0) as TotalVolume, ROUND(AVG(notional_usd), 0) as AvgFill FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND buyer IS NOT NULL AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring})) GROUP BY buyer ORDER BY TotalVolume DESC LIMIT 20",
+          "refId": "A"
+        }
+      ],
+      "title": "Top Whales (by Volume)",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "TotalUSD"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "displayName",
+                "value": "Total USD"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "continuous-GrYlRd"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Side"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "BUY": {
+                        "color": "green",
+                        "text": "BUY"
+                      }
+                    },
+                    "type": "value"
+                  },
+                  {
+                    "options": {
+                      "SELL": {
+                        "color": "red",
+                        "text": "SELL"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Trader"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "pattern": "\u2b50.*",
+                      "result": {
+                        "color": "green"
+                      }
+                    },
+                    "type": "regex"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 24
+      },
+      "id": 221,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": true,
+          "show": true
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH orders AS (SELECT buyer, pair, side, FLOOR(timestamp/1000) as order_sec, MIN(timestamp) as first_fill, COUNT(*) as fills, SUM(notional_usd) as order_usd, GROUP_CONCAT(ROUND(notional_usd, 0) ORDER BY timestamp SEPARATOR ' + ') as fill_breakdown FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND buyer IS NOT NULL AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring})) GROUP BY buyer, pair, side, FLOOR(timestamp/1000) HAVING COUNT(*) >= 2) SELECT FROM_UNIXTIME(first_fill/1000) as Time, pair as Pair, CASE WHEN side = 'B' THEN 'BUY' ELSE 'SELL' END as Side, fills as Fills, CONCAT('$', fill_breakdown) as Breakdown, ROUND(order_usd, 0) as TotalUSD, CASE WHEN LOWER(buyer) = LOWER('${my_wallet}') THEN '\u2b50 ME' ELSE CONCAT(LEFT(buyer, 6), '...') END as Trader FROM orders ORDER BY first_fill DESC LIMIT 30",
+          "refId": "A"
+        }
+      ],
+      "title": "Multi-Fill Orders (2+ fills)",
+      "type": "table"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 42,
+  "tags": [
+    "trading",
+    "volume",
+    "analytics",
+    "my-trades"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "YOUR_WALLET_ADDRESS",
+          "value": "YOUR_WALLET_ADDRESS"
+        },
+        "label": "My Wallet",
+        "name": "my_wallet",
+        "query": "YOUR_WALLET_ADDRESS",
+        "type": "constant"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "mysql",
+          "uid": "ef1n1ggi71xq8d"
+        },
+        "includeAll": true,
+        "label": "Currency",
+        "multi": true,
+        "name": "pair",
+        "query": "SELECT DISTINCT pair FROM trade_sizes WHERE timestamp > UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 24 HOUR)) * 1000 ORDER BY pair",
+        "refresh": 2,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "5 min",
+          "value": "300"
+        },
+        "label": "Interval",
+        "name": "interval",
+        "options": [
+          {
+            "selected": false,
+            "text": "1 min",
+            "value": "60"
+          },
+          {
+            "selected": true,
+            "text": "5 min",
+            "value": "300"
+          },
+          {
+            "selected": false,
+            "text": "15 min",
+            "value": "900"
+          }
+        ],
+        "type": "custom"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "Trade Analytics + My Trading",
+  "uid": "trade-size-analytics-v4",
+  "version": 1
+}

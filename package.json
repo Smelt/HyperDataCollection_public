@@ -1,0 +1,57 @@
+{
+  "name": "hyperliquid-market-maker",
+  "version": "1.0.0",
+  "description": "Market making bot for Hyperliquid DEX - Data Collection & Analysis",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "start": "tsx src/index.ts",
+    "api": "tsx src/api/spread-api.ts",
+    "fetch:trades": "tsx src/fetch-trades.ts",
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "monitor:rate-limit": "tsx src/monitors/rate-limit-monitor.ts"
+  },
+  "keywords": [
+    "hyperliquid",
+    "market-making",
+    "trading",
+    "orderbook",
+    "cryptocurrency"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@aws-sdk/client-cloudwatch": "^3.913.0",
+    "@aws-sdk/client-dynamodb": "^3.913.0",
+    "@aws-sdk/client-s3": "^3.913.0",
+    "@aws-sdk/client-secrets-manager": "^3.913.0",
+    "@aws-sdk/credential-providers": "^3.913.0",
+    "@aws-sdk/lib-dynamodb": "^3.913.0",
+    "@nktkas/hyperliquid": "^0.25.4",
+    "@types/node": "^20.0.0",
+    "axios": "^1.6.0",
+    "cors": "^2.8.5",
+    "csv-writer": "^1.6.0",
+    "date-fns": "^3.0.0",
+    "dotenv": "^16.0.0",
+    "express": "^5.1.0",
+    "mysql2": "^3.15.2",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/ws": "^8.5.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.0",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
+  }
+}

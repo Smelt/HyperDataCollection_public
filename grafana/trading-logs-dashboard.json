@@ -1,0 +1,73 @@
+{
+  "id": 33,
+  "panels": [
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "ff1rcq0cotji8e"
+      },
+      "gridPos": {
+        "h": 24,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": true,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "targets": [
+        {
+          "expr": "{job=\"trading-bot\", currency=~\"$currency\"}",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Trading Logs - ${currency}",
+      "type": "logs"
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "tags": [
+    "trading",
+    "logs"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "loki",
+          "uid": "ff1rcq0cotji8e"
+        },
+        "definition": "label_values(currency)",
+        "includeAll": true,
+        "multi": false,
+        "name": "currency",
+        "query": "label_values(currency)",
+        "refresh": 1,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "Trading Bot Logs",
+  "uid": "trading-logs",
+  "version": 2
+}

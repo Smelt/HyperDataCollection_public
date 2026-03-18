@@ -1,0 +1,1332 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Analyze taker order sizes and price impact to find opportunities",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 39,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "panels": [],
+      "title": "KEY METRICS",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "description": "Average USD per order after grouping multi-fills",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 1
+      },
+      "id": 10,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH orders AS (SELECT buyer, pair, side, FLOOR(timestamp/1000) as sec, SUM(notional_usd) as order_usd FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND buyer IS NOT NULL AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring})) GROUP BY buyer, pair, side, FLOOR(timestamp/1000)) SELECT ROUND(AVG(order_usd), 0) as value FROM orders",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg Order Size",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "description": "Orders that walked the book",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 1,
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "yellow",
+                "value": 20
+              },
+              {
+                "color": "orange",
+                "value": 40
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 4,
+        "y": 1
+      },
+      "id": 11,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH orders AS (SELECT buyer, pair, side, FLOOR(timestamp/1000) as sec, COUNT(*) as fills FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND buyer IS NOT NULL AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring})) GROUP BY buyer, pair, side, FLOOR(timestamp/1000)) SELECT ROUND(SUM(CASE WHEN fills > 1 THEN 1 ELSE 0 END) / COUNT(*) * 100, 1) as value FROM orders",
+          "refId": "A"
+        }
+      ],
+      "title": "% Multi-Fill",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "description": "Price levels consumed",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "yellow",
+                "value": 2
+              },
+              {
+                "color": "red",
+                "value": 4
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 7,
+        "y": 1
+      },
+      "id": 12,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH orders AS (SELECT buyer, pair, side, FLOOR(timestamp/1000) as sec, COUNT(*) as fills FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND buyer IS NOT NULL AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring})) GROUP BY buyer, pair, side, FLOOR(timestamp/1000)) SELECT ROUND(AVG(fills), 2) as value FROM orders",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg Fills",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "description": "Price movement (multi-fill)",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 3,
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "yellow",
+                "value": 0.1
+              },
+              {
+                "color": "red",
+                "value": 0.5
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 10,
+        "y": 1
+      },
+      "id": 13,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH orders AS (SELECT buyer, pair, side, FLOOR(timestamp/1000) as sec, COUNT(*) as fills, MIN(price) as min_px, MAX(price) as max_px FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND buyer IS NOT NULL AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring})) GROUP BY buyer, pair, side, FLOOR(timestamp/1000) HAVING COUNT(*) > 1) SELECT ROUND(AVG((max_px - min_px) / min_px * 100), 3) as value FROM orders",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg Impact",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "description": "Largest order seen",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "purple",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 14,
+        "y": 1
+      },
+      "id": 14,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH orders AS (SELECT buyer, pair, side, FLOOR(timestamp/1000) as sec, SUM(notional_usd) as order_usd FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND buyer IS NOT NULL AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring})) GROUP BY buyer, pair, side, FLOOR(timestamp/1000)) SELECT ROUND(MAX(order_usd), 0) as value FROM orders",
+          "refId": "A"
+        }
+      ],
+      "title": "Max Order",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "description": "Largest slippage seen",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 3,
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "orange",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 18,
+        "y": 1
+      },
+      "id": 15,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH orders AS (SELECT buyer, pair, side, FLOOR(timestamp/1000) as sec, COUNT(*) as fills, MIN(price) as min_px, MAX(price) as max_px FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND buyer IS NOT NULL AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring})) GROUP BY buyer, pair, side, FLOOR(timestamp/1000) HAVING COUNT(*) > 1) SELECT ROUND(MAX((max_px - min_px) / min_px * 100), 3) as value FROM orders",
+          "refId": "A"
+        }
+      ],
+      "title": "Max Impact",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "semi-dark-green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 21,
+        "y": 1
+      },
+      "id": 16,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH orders AS (SELECT buyer, pair, side, FLOOR(timestamp/1000) as sec FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND buyer IS NOT NULL AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring})) GROUP BY buyer, pair, side, FLOOR(timestamp/1000)) SELECT COUNT(*) as value FROM orders",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Orders",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "id": 20,
+      "panels": [],
+      "title": "DISTRIBUTIONS",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "description": "How many orders fall into each size bucket",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 85,
+            "gradientMode": "scheme",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 6
+      },
+      "id": 21,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.85,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "hidden",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "vertical",
+        "showValue": "always",
+        "stacking": "none",
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": -45,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH orders AS (SELECT buyer, pair, side, FLOOR(timestamp/1000) as sec, SUM(notional_usd) as order_usd FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND buyer IS NOT NULL AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring})) GROUP BY buyer, pair, side, FLOOR(timestamp/1000)), buckets AS (SELECT CASE WHEN order_usd < 25 THEN '01. <$25' WHEN order_usd < 50 THEN '02. $25-50' WHEN order_usd < 100 THEN '03. $50-100' WHEN order_usd < 250 THEN '04. $100-250' WHEN order_usd < 500 THEN '05. $250-500' WHEN order_usd < 1000 THEN '06. $500-1K' WHEN order_usd < 2500 THEN '07. $1K-2.5K' WHEN order_usd < 5000 THEN '08. $2.5K-5K' WHEN order_usd < 10000 THEN '09. $5K-10K' WHEN order_usd < 25000 THEN '10. $10K-25K' ELSE '11. $25K+' END as bucket, order_usd FROM orders) SELECT SUBSTRING(bucket, 5) as Size, COUNT(*) as Orders FROM buckets GROUP BY bucket ORDER BY bucket",
+          "refId": "A"
+        }
+      ],
+      "title": "Order Size Distribution (Histogram)",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "description": "How many multi-fill orders fall into each slippage bucket",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 6
+      },
+      "id": 22,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH orders AS (SELECT buyer, pair, side, FLOOR(timestamp/1000) as sec, COUNT(*) as fills, MIN(price) as min_px, MAX(price) as max_px, (MAX(price) - MIN(price)) / MIN(price) * 100 as impact_pct FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND buyer IS NOT NULL AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring})) GROUP BY buyer, pair, side, FLOOR(timestamp/1000) HAVING COUNT(*) > 1), buckets AS (SELECT CASE WHEN impact_pct < 0.01 THEN '01. <0.01%' WHEN impact_pct < 0.02 THEN '02. 0.01-0.02%' WHEN impact_pct < 0.05 THEN '03. 0.02-0.05%' WHEN impact_pct < 0.1 THEN '04. 0.05-0.1%' WHEN impact_pct < 0.2 THEN '05. 0.1-0.2%' WHEN impact_pct < 0.5 THEN '06. 0.2-0.5%' WHEN impact_pct < 1.0 THEN '07. 0.5-1%' ELSE '08. >1%' END as bucket, impact_pct FROM orders) SELECT SUBSTRING(bucket, 5) as Impact, COUNT(*) as Orders FROM buckets GROUP BY bucket ORDER BY bucket",
+          "refId": "A"
+        }
+      ],
+      "title": "Price Impact Distribution (Histogram)",
+      "type": "histogram"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "description": "Average reconstructed order size per currency",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AvgOrder"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "displayName",
+                "value": "Avg Order"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "continuous-GrYlRd"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "MaxOrder"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "displayName",
+                "value": "Max Order"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PctMulti"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "displayName",
+                "value": "% Multi"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AvgImpact"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "displayName",
+                "value": "Avg Impact"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 14
+      },
+      "id": 23,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH orders AS (SELECT buyer, pair, side, FLOOR(timestamp/1000) as sec, COUNT(*) as fills, SUM(notional_usd) as order_usd, MIN(price) as min_px, MAX(price) as max_px FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND buyer IS NOT NULL AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring})) GROUP BY buyer, pair, side, FLOOR(timestamp/1000)) SELECT pair as Currency, COUNT(*) as Orders, SUM(CASE WHEN fills > 1 THEN 1 ELSE 0 END) as MultiFill, ROUND(SUM(CASE WHEN fills > 1 THEN 1 ELSE 0 END) / COUNT(*) * 100, 0) as PctMulti, ROUND(AVG(order_usd), 0) as AvgOrder, ROUND(MAX(order_usd), 0) as MaxOrder, ROUND(AVG(fills), 1) as AvgFills, ROUND(AVG(CASE WHEN fills > 1 THEN (max_px - min_px) / min_px * 100 END), 3) as AvgImpact FROM orders GROUP BY pair ORDER BY AvgOrder DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Order Size by Currency",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "description": "How much slippage do different order sizes experience?",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "AvgImpact"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "displayName",
+                "value": "Avg Impact"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "continuous-GrYlRd"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "MaxImpact"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "displayName",
+                "value": "Max Impact"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "WalkedBook"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Walked Book"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 14
+      },
+      "id": 24,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH orders AS (SELECT buyer, pair, side, FLOOR(timestamp/1000) as sec, COUNT(*) as fills, SUM(notional_usd) as order_usd, MIN(price) as min_px, MAX(price) as max_px FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND buyer IS NOT NULL AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring})) GROUP BY buyer, pair, side, FLOOR(timestamp/1000)), buckets AS (SELECT CASE WHEN order_usd < 100 THEN '1. <$100' WHEN order_usd < 500 THEN '2. $100-500' WHEN order_usd < 1000 THEN '3. $500-1K' WHEN order_usd < 2500 THEN '4. $1K-2.5K' WHEN order_usd < 5000 THEN '5. $2.5K-5K' WHEN order_usd < 10000 THEN '6. $5K-10K' ELSE '7. $10K+' END as bucket, fills, order_usd, CASE WHEN fills > 1 THEN (max_px - min_px) / min_px * 100 ELSE 0 END as impact_pct FROM orders) SELECT SUBSTRING(bucket, 4) as OrderSize, COUNT(*) as Orders, ROUND(AVG(fills), 1) as AvgFills, SUM(CASE WHEN fills > 1 THEN 1 ELSE 0 END) as WalkedBook, ROUND(AVG(CASE WHEN fills > 1 THEN impact_pct END), 4) as AvgImpact, ROUND(MAX(impact_pct), 4) as MaxImpact FROM buckets GROUP BY bucket ORDER BY bucket",
+          "refId": "A"
+        }
+      ],
+      "title": "Price Impact by Order Size",
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 21
+      },
+      "id": 30,
+      "panels": [],
+      "title": "TRENDS & OPPORTUNITIES",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 22
+      },
+      "id": 31,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "WITH orders AS (SELECT buyer, pair, side, FLOOR(timestamp/1000) as sec, FLOOR(timestamp/1000/300)*300 as bucket, SUM(notional_usd) as order_usd FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND buyer IS NOT NULL AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring})) GROUP BY buyer, pair, side, FLOOR(timestamp/1000), bucket) SELECT FROM_UNIXTIME(bucket) as time, 'Avg Order' as metric, ROUND(AVG(order_usd), 2) as value FROM orders GROUP BY bucket ORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "title": "Order Size Over Time",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "orange",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 3,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 22
+      },
+      "id": 32,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "WITH orders AS (SELECT buyer, pair, side, FLOOR(timestamp/1000) as sec, FLOOR(timestamp/1000/300)*300 as bucket, COUNT(*) as fills, MIN(price) as min_px, MAX(price) as max_px FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND buyer IS NOT NULL AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring})) GROUP BY buyer, pair, side, FLOOR(timestamp/1000), bucket HAVING COUNT(*) > 1) SELECT FROM_UNIXTIME(bucket) as time, 'Avg Impact' as metric, ROUND(AVG((max_px - min_px) / min_px * 100), 4) as value FROM orders GROUP BY bucket ORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "title": "Price Impact Over Time",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "description": "These orders walked the book - potential fill opportunities",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "footer": {}
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "OrderUSD"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "displayName",
+                "value": "Order USD"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "continuous-GrYlRd"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ImpactPct"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "displayName",
+                "value": "Impact %"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "continuous-GrYlRd"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Side"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "BUY": {
+                        "color": "green",
+                        "text": "BUY"
+                      }
+                    },
+                    "type": "value"
+                  },
+                  {
+                    "options": {
+                      "SELL": {
+                        "color": "red",
+                        "text": "SELL"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 28
+      },
+      "id": 40,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": true,
+          "show": true
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH orders AS (SELECT buyer, pair, side, FLOOR(timestamp/1000) as sec, MIN(timestamp) as first_fill, COUNT(*) as fills, SUM(notional_usd) as order_usd, SUM(size) as total_size, MIN(price) as entry_px, MAX(price) as exit_px, (MAX(price) - MIN(price)) / MIN(price) * 100 as impact_pct FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND buyer IS NOT NULL AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring})) GROUP BY buyer, pair, side, FLOOR(timestamp/1000) HAVING SUM(notional_usd) >= 1000 AND COUNT(*) > 1) SELECT FROM_UNIXTIME(first_fill/1000) as Time, pair as Pair, CASE WHEN side = 'B' THEN 'BUY' ELSE 'SELL' END as Side, fills as Fills, ROUND(order_usd, 0) as OrderUSD, ROUND(entry_px, 6) as EntryPx, ROUND(exit_px, 6) as ExitPx, ROUND(impact_pct, 4) as ImpactPct, CONCAT(LEFT(buyer, 6), '...') as Trader FROM orders ORDER BY first_fill DESC LIMIT 50",
+          "refId": "A"
+        }
+      ],
+      "title": "Large Taker Orders (>$1K with slippage)",
+      "type": "table"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 36
+      },
+      "id": 50,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "### Trading Insight\nThe **Price Impact Distribution** shows where most slippage occurs. If most orders have <0.05% impact, tighter markets. If many orders have >0.2% impact, you can place limit orders further from mid and still get filled. Use the **Order Size by Currency** table to identify which pairs have the most aggressive takers.",
+        "mode": "markdown"
+      },
+      "pluginVersion": "12.2.0",
+      "title": "",
+      "type": "text"
+    }
+  ],
+  "preload": false,
+  "refresh": "30s",
+  "schemaVersion": 42,
+  "tags": [
+    "trading",
+    "taker",
+    "slippage",
+    "opportunity"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "mysql",
+          "uid": "ef1n1ggi71xq8d"
+        },
+        "includeAll": true,
+        "label": "Currency",
+        "multi": true,
+        "name": "pair",
+        "query": "SELECT DISTINCT pair FROM trade_sizes WHERE timestamp > UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 24 HOUR)) * 1000 ORDER BY pair",
+        "refresh": 2,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Taker Order Analysis",
+  "uid": "taker-order-analysis",
+  "version": 3
+}

@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build output
+dist/
+
+# Environment variables
+.env
+.env.local
+
+# Data files
+data/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# TypeScript
+*.tsbuildinfo
+
+# Backups
+backups/
+
+# Grafana backups
+grafana/backup-*/
+
+# Claude settings (may contain server IPs)
+.claude/
+
+# Deployment archives
+*.tar.gz
+
+# Old git history backup
+.git.bak/

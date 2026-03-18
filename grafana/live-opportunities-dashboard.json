@@ -1,0 +1,459 @@
+{
+  "id": 22,
+  "panels": [
+    {
+      "fieldConfig": {
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Profit After Fees (bps)"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "continuous-GrYlRd"
+                }
+              },
+              {
+                "id": "custom.width",
+                "value": 180
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "footer": {
+          "show": false
+        },
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Profit After Fees (bps)"
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT pair as 'Pair', ROUND(AVG(avg_spread_bps), 2) as 'Avg Spread (bps)', ROUND(AVG(avg_spread_bps) - 3.0, 2) as 'Profit After Fees (bps)', ROUND(MIN(spread_bps), 2) as 'Min (bps)', ROUND(MAX(spread_bps), 2) as 'Max (bps)', COUNT(*) as 'Samples' FROM spread_snapshots_1min WHERE timestamp >= $__timeFrom() AND timestamp <= $__timeTo() GROUP BY pair HAVING AVG(avg_spread_bps) > 3.0 ORDER BY `Profit After Fees (bps)` DESC LIMIT 20",
+          "refId": "A"
+        }
+      ],
+      "title": "\ud83c\udfaf Top Opportunities Now (Last 15 Minutes)",
+      "type": "table"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 15,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": true
+          },
+          "decimals": 3,
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "last",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "right"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "time_series",
+          "rawSql": "SELECT FLOOR(s.timestamp/1000) as time_sec, s.pair, s.spread_pct as value FROM spread_snapshots s INNER JOIN (SELECT pair FROM spread_snapshots_1min WHERE timestamp >= $__timeFrom() AND timestamp <= $__timeTo() GROUP BY pair ORDER BY AVG(avg_spread_bps) DESC LIMIT 10) top_pairs ON s.pair = top_pairs.pair WHERE s.timestamp >= $__timeFrom() AND timestamp <= $__timeTo() ORDER BY time_sec",
+          "refId": "A"
+        }
+      ],
+      "title": "\ud83d\udcc8 Live Spread Trends - Top 10 Pairs (Last Hour)",
+      "type": "timeseries"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd"
+          },
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 10
+              },
+              {
+                "color": "green",
+                "value": 20
+              },
+              {
+                "color": "dark-green",
+                "value": 50
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 14,
+        "x": 0,
+        "y": 19
+      },
+      "id": 3,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "showUnfilled": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT pair, ROUND(AVG(avg_spread_bps) - 3.0, 2) as profit_bps FROM spread_snapshots_1min WHERE timestamp >= $__timeFrom() AND timestamp <= $__timeTo() GROUP BY pair HAVING profit_bps > 0 ORDER BY profit_bps DESC LIMIT 15",
+          "refId": "A"
+        }
+      ],
+      "title": "\ud83d\udcb0 Current Profitability (Last 5 Minutes)",
+      "type": "bargauge"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 2,
+          "mappings": [
+            {
+              "options": {
+                "pattern": "*",
+                "result": {
+                  "text": "${__value.raw} bps profit"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 50
+              },
+              {
+                "color": "red",
+                "value": 100
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 14,
+        "y": 19
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT pair as metric, ROUND(AVG(avg_spread_bps) - 3.0, 2) as value FROM spread_snapshots_1min WHERE timestamp >= $__timeFrom() AND timestamp <= $__timeTo() GROUP BY pair ORDER BY value DESC LIMIT 1",
+          "refId": "A"
+        }
+      ],
+      "title": "\ud83c\udfc6 Best Opportunity Right Now",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 5
+              },
+              {
+                "color": "green",
+                "value": 10
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 5,
+        "x": 19,
+        "y": 19
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT COUNT(DISTINCT pair) as value FROM spread_snapshots WHERE timestamp >= $__timeFrom() AND timestamp <= $__timeTo() AND spread_bps > 13.0",
+          "refId": "A"
+        }
+      ],
+      "title": "\ud83d\udcca Profitable Pairs Count",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 2,
+          "mappings": [
+            {
+              "options": {
+                "pattern": "*",
+                "result": {
+                  "text": "${__value.raw} bps avg profit"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 10,
+        "x": 14,
+        "y": 23
+      },
+      "id": 6,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT ROUND(AVG(spread_bps - 3.0), 2) as value FROM spread_snapshots_1min WHERE timestamp >= $__timeFrom() AND timestamp <= $__timeTo() AND spread_bps > 3.0",
+          "refId": "A"
+        }
+      ],
+      "title": "\u23f1\ufe0f Average Profit Trend (5-Min Buckets)",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 8,
+        "x": 0,
+        "y": 27
+      },
+      "id": 7,
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) as value FROM spread_snapshots WHERE timestamp >= $__timeFrom() AND timestamp <= $__timeTo()",
+          "refId": "A"
+        }
+      ],
+      "title": "\ud83d\udce6 Total Data Points",
+      "type": "stat"
+    },
+    {
+      "gridPos": {
+        "h": 3,
+        "w": 8,
+        "x": 8,
+        "y": 27
+      },
+      "id": 8,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT CONCAT(pair, ' - ', ROUND(spread_bps, 2), ' bps') as value FROM spread_snapshots WHERE timestamp >= $__timeFrom() AND timestamp <= $__timeTo() ORDER BY spread_bps DESC LIMIT 1",
+          "refId": "A"
+        }
+      ],
+      "title": "\ud83d\udd25 Highest Spread (Last 15m)",
+      "type": "stat"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 8,
+        "x": 16,
+        "y": 27
+      },
+      "id": 9,
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "ef1n1ggi71xq8d"
+          },
+          "format": "table",
+          "rawSql": "SELECT COUNT(DISTINCT pair) as value FROM spread_snapshots WHERE timestamp >= $__timeFrom() AND timestamp <= $__timeTo()",
+          "refId": "A"
+        }
+      ],
+      "title": "\u26a1 Pairs Tracked",
+      "type": "stat"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 16,
+  "tags": [
+    "hyperliquid",
+    "live",
+    "optimized"
+  ],
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "Live Trading Opportunities",
+  "uid": "ce75abb8-08c7-49d6-a279-635125e4a7de",
+  "version": 2
+}

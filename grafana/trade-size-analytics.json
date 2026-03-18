@@ -1,0 +1,879 @@
+{
+  "description": "Position sizing analytics - notional USD distributions, moving averages, and percentiles",
+  "id": 34,
+  "panels": [
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) as value FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring}))",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Trades",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(DISTINCT pair) as value FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring}))",
+          "refId": "A"
+        }
+      ],
+      "title": "Currencies Tracked",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "purple",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT ROUND(AVG(notional_usd), 2) as value FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring}))",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg Notional USD",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "orange",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH ranked AS (\n  SELECT notional_usd, PERCENT_RANK() OVER (ORDER BY notional_usd) as pct_rank\n  FROM trade_sizes\n  WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000\n    AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring}))\n)\nSELECT ROUND(MIN(CASE WHEN pct_rank >= 0.50 THEN notional_usd END), 2) as value FROM ranked",
+          "refId": "A"
+        }
+      ],
+      "title": "Median Notional (P50)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 15,
+            "gradientMode": "opacity",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": true
+          },
+          "unit": "currencyUSD"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 16,
+        "x": 0,
+        "y": 4
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT FROM_UNIXTIME(FLOOR(timestamp/1000/$window_seconds)*$window_seconds) as time, pair as metric, ROUND(AVG(notional_usd), 2) as value FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring})) GROUP BY FLOOR(timestamp/1000/$window_seconds), pair ORDER BY time",
+          "refId": "A"
+        }
+      ],
+      "title": "Notional USD Moving Average",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Currency"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "string"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Trades"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 4
+      },
+      "id": 6,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH ranked AS (\n  SELECT \n    pair,\n    notional_usd,\n    PERCENT_RANK() OVER (PARTITION BY pair ORDER BY notional_usd) as pct_rank\n  FROM trade_sizes\n  WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000\n    AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring}))\n)\nSELECT \n  pair as Currency,\n  COUNT(*) as Trades,\n  ROUND(MIN(CASE WHEN pct_rank >= 0.25 THEN notional_usd END), 2) as P25,\n  ROUND(MIN(CASE WHEN pct_rank >= 0.50 THEN notional_usd END), 2) as P50,\n  ROUND(MIN(CASE WHEN pct_rank >= 0.75 THEN notional_usd END), 2) as P75\nFROM ranked\nGROUP BY pair\nORDER BY Trades DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Percentiles by Currency",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "description": "X-axis shows percentile buckets, Y-axis shows notional USD, colors represent currencies",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "fillOpacity": 80,
+            "gradientMode": "hue"
+          },
+          "unit": "currencyUSD"
+        }
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 7,
+      "options": {
+        "barWidth": 0.8,
+        "groupWidth": 0.7,
+        "legend": {
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
+        "orientation": "vertical",
+        "showValue": "auto",
+        "tooltip": {
+          "mode": "multi"
+        },
+        "xTickLabelRotation": 0
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH ranked AS (\n  SELECT \n    pair,\n    notional_usd,\n    CASE \n      WHEN PERCENT_RANK() OVER (PARTITION BY pair ORDER BY notional_usd) < 0.10 THEN 'P0-10'\n      WHEN PERCENT_RANK() OVER (PARTITION BY pair ORDER BY notional_usd) < 0.25 THEN 'P10-25'\n      WHEN PERCENT_RANK() OVER (PARTITION BY pair ORDER BY notional_usd) < 0.50 THEN 'P25-50'\n      WHEN PERCENT_RANK() OVER (PARTITION BY pair ORDER BY notional_usd) < 0.75 THEN 'P50-75'\n      WHEN PERCENT_RANK() OVER (PARTITION BY pair ORDER BY notional_usd) < 0.90 THEN 'P75-90'\n      ELSE 'P90-100'\n    END as percentile_bucket\n  FROM trade_sizes\n  WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000\n    AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring}))\n)\nSELECT \n  percentile_bucket as Percentile,\n  pair as Currency,\n  ROUND(AVG(notional_usd), 2) as NotionalUSD\nFROM ranked\nGROUP BY percentile_bucket, pair\nORDER BY \n  CASE percentile_bucket\n    WHEN 'P0-10' THEN 1\n    WHEN 'P10-25' THEN 2\n    WHEN 'P25-50' THEN 3\n    WHEN 'P50-75' THEN 4\n    WHEN 'P75-90' THEN 5\n    WHEN 'P90-100' THEN 6\n  END, pair",
+          "refId": "A"
+        }
+      ],
+      "title": "Notional USD by Percentile (by Currency)",
+      "transformations": [
+        {
+          "id": "prepareTimeSeries",
+          "options": {
+            "format": "multi"
+          }
+        }
+      ],
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": true
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "P25"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "P50"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "P75"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull"
+          ],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "WITH time_buckets AS (\n  SELECT \n    FLOOR(timestamp/1000/$window_seconds)*$window_seconds as time_bucket,\n    notional_usd,\n    PERCENT_RANK() OVER (PARTITION BY FLOOR(timestamp/1000/$window_seconds) ORDER BY notional_usd) as pct_rank\n  FROM trade_sizes\n  WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000\n    AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring}))\n)\nSELECT \n  FROM_UNIXTIME(time_bucket) as time,\n  'P25' as metric,\n  ROUND(MIN(CASE WHEN pct_rank >= 0.25 THEN notional_usd END), 2) as value\nFROM time_buckets\nGROUP BY time_bucket\nUNION ALL\nSELECT \n  FROM_UNIXTIME(time_bucket) as time,\n  'P50' as metric,\n  ROUND(MIN(CASE WHEN pct_rank >= 0.50 THEN notional_usd END), 2) as value\nFROM time_buckets\nGROUP BY time_bucket\nUNION ALL\nSELECT \n  FROM_UNIXTIME(time_bucket) as time,\n  'P75' as metric,\n  ROUND(MIN(CASE WHEN pct_rank >= 0.75 THEN notional_usd END), 2) as value\nFROM time_buckets\nGROUP BY time_bucket\nORDER BY time, metric",
+          "refId": "A"
+        }
+      ],
+      "title": "Percentile Trends Over Time (Notional USD)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          }
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 30
+      },
+      "id": 9,
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "value",
+            "percent"
+          ]
+        },
+        "pieType": "donut",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT pair, COUNT(*) as trades FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring})) GROUP BY pair ORDER BY trades DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Trade Count by Currency",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "fillOpacity": 80
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "BuyAvg"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Buy Avg"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "SellAvg"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Sell Avg"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 30
+      },
+      "id": 10,
+      "options": {
+        "barWidth": 0.8,
+        "groupWidth": 0.7,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "horizontal",
+        "showValue": "auto",
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT pair as Currency, ROUND(AVG(CASE WHEN side = 'B' THEN notional_usd END), 2) as BuyAvg, ROUND(AVG(CASE WHEN side = 'A' THEN notional_usd END), 2) as SellAvg FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring})) GROUP BY pair ORDER BY pair",
+          "refId": "A"
+        }
+      ],
+      "title": "Buy vs Sell Notional USD",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "description": "P25 represents smaller trades - good for blending in with market flow",
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "P25_USD"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "displayName",
+                "value": "P25 (USD)"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "continuous-GrYlRd"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "P50_USD"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "displayName",
+                "value": "P50 (USD)"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 30
+      },
+      "id": 11,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "WITH ranked AS (\n  SELECT \n    pair,\n    notional_usd,\n    PERCENT_RANK() OVER (PARTITION BY pair ORDER BY notional_usd) as pct_rank\n  FROM trade_sizes\n  WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000\n    AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring}))\n)\nSELECT \n  pair as Currency,\n  ROUND(MIN(CASE WHEN pct_rank >= 0.25 THEN notional_usd END), 2) as P25_USD,\n  ROUND(MIN(CASE WHEN pct_rank >= 0.50 THEN notional_usd END), 2) as P50_USD,\n  COUNT(*) as Samples\nFROM ranked\nGROUP BY pair\nHAVING COUNT(*) >= 3\nORDER BY P25_USD DESC",
+          "refId": "A"
+        }
+      ],
+      "title": "Recommended Position Size (P25 Notional)",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "ef1n1ggi71xq8d"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "NotionalUSD"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "displayName",
+                "value": "Notional USD"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Side"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "Buy": {
+                        "color": "green",
+                        "text": "Buy"
+                      }
+                    },
+                    "type": "value"
+                  },
+                  {
+                    "options": {
+                      "Sell": {
+                        "color": "red",
+                        "text": "Sell"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 38
+      },
+      "id": 12,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": true,
+          "show": true
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT FROM_UNIXTIME(timestamp/1000) as Time, pair as Currency, CASE WHEN side = 'B' THEN 'Buy' ELSE 'Sell' END as Side, ROUND(notional_usd, 2) as NotionalUSD, ROUND(size, 4) as Size, ROUND(price, 6) as Price FROM trade_sizes WHERE timestamp >= UNIX_TIMESTAMP($__timeFrom()) * 1000 AND timestamp <= UNIX_TIMESTAMP($__timeTo()) * 1000 AND ('${pair:raw}' = '$__all' OR pair IN (${pair:sqlstring})) ORDER BY timestamp DESC LIMIT 100",
+          "refId": "A"
+        }
+      ],
+      "title": "Recent Trades",
+      "type": "table"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 42,
+  "tags": [
+    "trading",
+    "position-sizing",
+    "analytics"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "mysql",
+          "uid": "ef1n1ggi71xq8d"
+        },
+        "includeAll": true,
+        "label": "Currency",
+        "multi": true,
+        "name": "pair",
+        "query": "SELECT DISTINCT pair FROM trade_sizes WHERE timestamp > UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 24 HOUR)) * 1000 ORDER BY pair",
+        "refresh": 2,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "15 minutes",
+          "value": "900"
+        },
+        "description": "Window size for moving averages in seconds",
+        "label": "Window Size",
+        "name": "window_seconds",
+        "options": [
+          {
+            "selected": false,
+            "text": "1 minute",
+            "value": "60"
+          },
+          {
+            "selected": false,
+            "text": "5 minutes",
+            "value": "300"
+          },
+          {
+            "selected": true,
+            "text": "15 minutes",
+            "value": "900"
+          },
+          {
+            "selected": false,
+            "text": "30 minutes",
+            "value": "1800"
+          },
+          {
+            "selected": false,
+            "text": "1 hour",
+            "value": "3600"
+          }
+        ],
+        "query": "60,300,900,1800,3600",
+        "type": "custom"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "Trade Size Analytics",
+  "uid": "trade-size-analytics",
+  "version": 4
+}
