@@ -61,10 +61,10 @@ echo "  Database: ${DB_NAME}"
 echo ""
 
 # Get the earliest available data timestamp
-EARLIEST_DATA=$(${MYSQL_BIN} ${DB_CONN} -se "SELECT MIN(timestamp) FROM spread_snapshots;" 2>&1 | grep -v "Using a password")
+EARLIEST_DATA=$(${MYSQL_BIN} ${DB_CONN} -se "SELECT MIN(timestamp) FROM spread_snapshots_partitioned;" 2>&1 | { grep -v "Using a password" || true; })
 
 if [ -z "$EARLIEST_DATA" ] || [ "$EARLIEST_DATA" = "NULL" ]; then
-  echo -e "${RED}Error: No data found in spread_snapshots table${NC}"
+  echo -e "${RED}Error: No data found in spread_snapshots_partitioned table${NC}"
   exit 1
 fi
 
@@ -147,7 +147,7 @@ SELECT
   AVG(ask_size) AS avg_ask_size,
   AVG(imbalance) AS avg_imbalance,
   COUNT(*) AS sample_count
-FROM spread_snapshots
+FROM spread_snapshots_partitioned
 WHERE timestamp >= ${CURRENT_WINDOW}
   AND timestamp < ${NEXT_WINDOW}
   AND mid_price IS NOT NULL
@@ -209,7 +209,7 @@ SELECT
   MAX(FROM_UNIXTIME(timestamp/1000)) as latest,
   SUM(sample_count) as total_snapshots_aggregated
 FROM spread_snapshots_1min;
-" 2>&1 | grep -v "Using a password"
+" 2>&1 | { grep -v "Using a password" || true; }
 
 echo ""
 echo "Top 5 Pairs by Sample Count:"
@@ -223,6 +223,6 @@ FROM spread_snapshots_1min
 GROUP BY pair
 ORDER BY total_samples DESC
 LIMIT 5;
-" 2>&1 | grep -v "Using a password"
+" 2>&1 | { grep -v "Using a password" || true; }
 
 echo ""

@@ -62,7 +62,7 @@ SNAPSHOT_CUTOFF=$(($(date +%s) * 1000 - 31 * 24 * 60 * 60 * 1000))
 echo "Deleting snapshots older than 31 days..."
 
 DELETED=$(${MYSQL_BIN} ${DB_CONN} -se \
-  "DELETE FROM spread_snapshots WHERE timestamp < ${SNAPSHOT_CUTOFF};
+  "DELETE FROM spread_snapshots_partitioned WHERE timestamp < ${SNAPSHOT_CUTOFF};
    SELECT ROW_COUNT();")
 
 echo -e "${GREEN}✓ Deleted ${DELETED} old snapshots${NC}"
@@ -74,9 +74,9 @@ echo "Deleting 1-minute aggregates older than 1 year..."
 
 # Check if table exists first
 TABLE_EXISTS=$(${MYSQL_BIN} ${DB_CONN} -se \
-  "SELECT COUNT(*) FROM information_schema.TABLES WHERE table_schema = '${DB_NAME}' AND table_name = 'spread_snapshots_1min';" 2>&1 | grep -v "Using a password")
+  "SELECT COUNT(*) FROM information_schema.TABLES WHERE table_schema = '${DB_NAME}' AND table_name = 'spread_snapshots_1min';" 2>&1 | { grep -v "Using a password" || true; } | tr -d '[:space:]')
 
-if [ "$TABLE_EXISTS" -eq "1" ]; then
+if [ "$TABLE_EXISTS" = "1" ]; then
   DELETED=$(${MYSQL_BIN} ${DB_CONN} -se \
     "DELETE FROM spread_snapshots_1min WHERE timestamp < ${AGGREGATE_1MIN_CUTOFF};
      SELECT ROW_COUNT();")
@@ -97,10 +97,12 @@ DELETED=$(${MYSQL_BIN} ${DB_CONN} -se \
 echo -e "${GREEN}✓ Deleted ${DELETED} old signals${NC}"
 echo ""
 
-# 4. Optimize tables
-echo "Optimizing tables..."
-${MYSQL_BIN} ${DB_CONN} -e "OPTIMIZE TABLE spread_snapshots;"
-if [ "$TABLE_EXISTS" -eq "1" ]; then
+# 4. Optimize small tables only.
+# spread_snapshots_partitioned is intentionally skipped: OPTIMIZE rebuilds every
+# partition under metadata locks (multi-GB / table stalls). Use manage-partitions.sh
+# to drop expired partitions instead.
+echo "Optimizing small tables..."
+if [ "$TABLE_EXISTS" = "1" ]; then
   ${MYSQL_BIN} ${DB_CONN} -e "OPTIMIZE TABLE spread_snapshots_1min;"
 fi
 ${MYSQL_BIN} ${DB_CONN} -e "OPTIMIZE TABLE trading_signals;"

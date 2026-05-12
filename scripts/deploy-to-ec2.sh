@@ -107,15 +107,18 @@ tar -xzf ~/$PACKAGE_NAME -C ~/hyperliquid-bot
 # Go to directory
 cd ~/hyperliquid-bot
 
-# Install dependencies
+# Install dependencies (include dev deps — tsx/tsc are needed by start scripts and build)
 echo "Installing dependencies..."
-npm install --production
+npm install
 
 # Build TypeScript (if needed)
 if [ -f "tsconfig.json" ]; then
   echo "Building TypeScript..."
   npm run build
 fi
+
+# Ensure cron log directory exists (crons write to logs/aggregate-1min.log etc.)
+mkdir -p logs
 
 # Start with PM2
 echo "Starting application with PM2..."

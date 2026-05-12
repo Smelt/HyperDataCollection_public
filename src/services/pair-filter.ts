@@ -145,7 +145,7 @@ export class PairFilterService {
           AVG(spread_bps) as avg_spread_bps,
           AVG(spread_bps) - 3.0 as profit_after_fees,
           COUNT(*) as sample_count
-        FROM spread_snapshots
+        FROM spread_snapshots_partitioned
         WHERE timestamp > (UNIX_TIMESTAMP(NOW()) - 86400) * 1000
         GROUP BY pair
         HAVING profit_after_fees >= ?

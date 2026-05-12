@@ -92,7 +92,7 @@ SELECT
   AVG(ask_size) AS avg_ask_size,
   AVG(imbalance) AS avg_imbalance,
   COUNT(*) AS sample_count
-FROM spread_snapshots
+FROM spread_snapshots_partitioned
 WHERE timestamp >= ${WINDOW_START}
   AND timestamp < ${WINDOW_END}
   AND mid_price IS NOT NULL
@@ -110,10 +110,10 @@ ON DUPLICATE KEY UPDATE
   avg_ask_size = VALUES(avg_ask_size),
   avg_imbalance = VALUES(avg_imbalance),
   sample_count = VALUES(sample_count);
-" 2>&1 | grep -v "Using a password on the command line"
+" 2>&1 | { grep -v "Using a password on the command line" || true; }
 
 # Count rows inserted/updated
-ROWS_AFFECTED=$(${MYSQL_BIN} ${DB_CONN} -se "SELECT ROW_COUNT();" 2>&1 | grep -v "Using a password")
+ROWS_AFFECTED=$(${MYSQL_BIN} ${DB_CONN} -se "SELECT ROW_COUNT();" 2>&1 | { grep -v "Using a password" || true; })
 
 # Log timestamp for this aggregation
 WINDOW_TIME=$(date -d "@$((WINDOW_START / 1000))" "+%Y-%m-%d %H:%M:%S" 2>/dev/null || date -r $((WINDOW_START / 1000)) "+%Y-%m-%d %H:%M:%S" 2>/dev/null || echo "1-min ago")

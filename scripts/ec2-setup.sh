@@ -221,7 +221,7 @@ echo "=== Database Connection ==="
 cd ~/hyperliquid-bot
 source .env 2>/dev/null
 if [ -n "$DB_HOST" ]; then
-  mysql -h"${DB_HOST}" -u"${DB_USER}" -p"${DB_PASSWORD}" ${DB_NAME} -e "SELECT COUNT(*) as total_snapshots FROM spread_snapshots;" 2>/dev/null || echo "Cannot connect to database"
+  mysql -h"${DB_HOST}" -u"${DB_USER}" -p"${DB_PASSWORD}" ${DB_NAME} -e "SELECT COUNT(*) as total_snapshots FROM spread_snapshots_partitioned;" 2>/dev/null || echo "Cannot connect to database"
 else
   echo ".env file not found"
 fi
