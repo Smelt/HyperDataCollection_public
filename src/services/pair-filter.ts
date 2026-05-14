@@ -16,18 +16,21 @@ export class PairFilterService {
   private scanInterval: number;
   private minProfitBps: number;
   private maxPairs: number;
+  private alwaysTrackPairs: string[];
 
   constructor(
     apiUrl: string,
     scanIntervalMs: number = 24 * 60 * 60 * 1000, // 24 hours
     minProfitBps: number = 5, // Minimum 5 bps profit after fees
     maxPairs: number = 30, // Maximum 30 pairs to track
-    hip3Dexes: string[] = [] // HIP-3 builder dex names to include
+    hip3Dexes: string[] = [], // HIP-3 builder dex names to include
+    alwaysTrackPairs: string[] = [] // Pinned pairs that survive every scan
   ) {
     this.api = new HyperliquidAPI(apiUrl, hip3Dexes);
     this.scanInterval = scanIntervalMs;
     this.minProfitBps = minProfitBps;
     this.maxPairs = maxPairs;
+    this.alwaysTrackPairs = alwaysTrackPairs;
   }
 
   /**
@@ -94,22 +97,40 @@ export class PairFilterService {
         .slice(0, this.maxPairs)
         .map(m => m.pair);
 
+      // Pin always-track pairs so the smart filter can't drop them under
+      // active traders. We append (rather than prepend) and dedupe so the
+      // discovery-ranked set still controls ordering of new entries.
+      const merged: string[] = [...profitablePairs];
+      const seen = new Set(profitablePairs);
+      const pinnedAdded: string[] = [];
+      for (const p of this.alwaysTrackPairs) {
+        if (!seen.has(p)) {
+          merged.push(p);
+          seen.add(p);
+          pinnedAdded.push(p);
+        }
+      }
+
       // Update filtered pairs
       const previousPairs = new Set(this.filteredPairs);
-      this.filteredPairs = new Set(profitablePairs);
+      this.filteredPairs = new Set(merged);
 
       // Log changes
-      const added = profitablePairs.filter(p => !previousPairs.has(p));
+      const added = merged.filter(p => !previousPairs.has(p));
       const removed = Array.from(previousPairs).filter(p => !this.filteredPairs.has(p));
 
       console.log(`✅ Discovery scan complete:`);
       console.log(`   • Profitable pairs: ${profitablePairs.length}`);
+      if (pinnedAdded.length > 0) {
+        console.log(`   • Pinned (always-track): ${pinnedAdded.join(', ')}`);
+      }
+      console.log(`   • Total tracked: ${merged.length}`);
       console.log(`   • Added: ${added.length} pairs - ${added.join(', ') || 'none'}`);
       console.log(`   • Removed: ${removed.length} pairs - ${removed.join(', ') || 'none'}`);
-      console.log(`   • Tracking: ${Array.from(this.filteredPairs).slice(0, 10).join(', ')}...`);
+      console.log(`   • Tracking: ${merged.slice(0, 10).join(', ')}${merged.length > 10 ? '...' : ''}`);
 
       this.lastScanTime = now;
-      return profitablePairs;
+      return merged;
 
     } catch (error) {
       console.error('❌ Discovery scan failed:', error);

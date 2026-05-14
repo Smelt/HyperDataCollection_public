@@ -11,6 +11,7 @@ import { testConnection, closePool, getPool } from './storage/database.js';
 import { collectionConfig } from './config/database.js';
 import { PairFilterService } from './services/pair-filter.js';
 import { TradeSizeCollector } from './services/trade-size-collector.js';
+import { CandleCollector } from './services/candle-collector.js';
 
 class HyperliquidMarketMaker {
   private monitor: OrderBookMonitor | null = null;
@@ -21,6 +22,7 @@ class HyperliquidMarketMaker {
   private hourlyStatsCalculator: StatsCalculator | null = null;
   private pairFilter: PairFilterService | null = null;
   private tradeSizeCollector: TradeSizeCollector | null = null;
+  private candleCollector: CandleCollector | null = null;
   private dashboardInterval: NodeJS.Timeout | null = null;
   private statsExportInterval: NodeJS.Timeout | null = null;
   private discoveryScanInterval: NodeJS.Timeout | null = null;
@@ -28,6 +30,7 @@ class HyperliquidMarketMaker {
   private enableDbLogging: boolean = false;
   private enableSmartFiltering: boolean = false;
   private enableTradeSizeCollection: boolean = false;
+  private enableCandleCollection: boolean = false;
 
   constructor() {
     // Initialize storage and display components
@@ -46,6 +49,11 @@ class HyperliquidMarketMaker {
 
     // Check if trade size collection is enabled (defaults to true if DB logging is enabled)
     this.enableTradeSizeCollection = process.env.ENABLE_TRADE_SIZE_COLLECTION !== 'false';
+
+    // Candle collection (per-pair hourly OHLCV from candleSnapshot)
+    // Defaults to true when DB logging is enabled — cheap to run and gives
+    // every tracked pair a per-hour volume series, including HIP-3 markets.
+    this.enableCandleCollection = process.env.ENABLE_CANDLE_COLLECTION !== 'false';
   }
 
   /**
@@ -64,8 +72,15 @@ class HyperliquidMarketMaker {
         ? process.env.HIP3_DEXES.split(',').map(d => d.trim()).filter(Boolean)
         : [];
 
+      const alwaysTrackPairs = process.env.SPREAD_ALWAYS_TRACK_PAIRS
+        ? process.env.SPREAD_ALWAYS_TRACK_PAIRS.split(',').map(p => p.trim()).filter(Boolean)
+        : [];
+
       if (hip3Dexes.length > 0) {
         console.log(`   📈 HIP-3 dexes enabled: ${hip3Dexes.join(', ')}`);
+      }
+      if (alwaysTrackPairs.length > 0) {
+        console.log(`   📌 Always-track pairs: ${alwaysTrackPairs.join(', ')}`);
       }
 
       this.pairFilter = new PairFilterService(
@@ -73,7 +88,8 @@ class HyperliquidMarketMaker {
         scanIntervalHours * 60 * 60 * 1000, // Convert hours to ms
         minProfitBps,
         maxPairs,
-        hip3Dexes
+        hip3Dexes,
+        alwaysTrackPairs
       );
 
       // Skip database initialization (slow query on large dataset)
@@ -160,10 +176,35 @@ class HyperliquidMarketMaker {
           await this.tradeSizeCollector.start(() => this.pairs);
           console.log(`✓ Trade size collection enabled (WebSocket, ${tradeSizeMaxPairs} pairs, batch: ${tradeBatchSize}, always tracking: ${alwaysTrackPairs.join(', ')})`);
         }
+
+        // Initialize candle collector (hourly OHLCV per pair)
+        if (this.enableCandleCollection) {
+          const candleIntervalMs = parseInt(process.env.CANDLE_POLL_INTERVAL_MS || `${5 * 60 * 1000}`);
+          const candleLookbackHours = parseInt(process.env.CANDLE_LOOKBACK_HOURS || '6');
+          const candlePerPairDelayMs = parseInt(process.env.CANDLE_PER_PAIR_DELAY_MS || '100');
+          const hip3DexesForCandles = process.env.HIP3_DEXES
+            ? process.env.HIP3_DEXES.split(',').map(d => d.trim()).filter(Boolean)
+            : [];
+
+          this.candleCollector = new CandleCollector(
+            getPool(),
+            config.hyperliquidApiUrl,
+            hip3DexesForCandles,
+            {
+              intervalMs: candleIntervalMs,
+              lookbackHours: candleLookbackHours,
+              perPairDelayMs: candlePerPairDelayMs,
+            }
+          );
+
+          await this.candleCollector.start(() => this.pairs);
+          console.log(`✓ Candle collection enabled (poll: ${candleIntervalMs / 1000}s, lookback: ${candleLookbackHours}h)`);
+        }
       } else {
         console.warn('⚠ Database connection failed - continuing without database logging');
         this.enableDbLogging = false;
         this.enableTradeSizeCollection = false;
+        this.enableCandleCollection = false;
       }
     } else {
       console.log('Database logging: disabled');
@@ -312,6 +353,11 @@ class HyperliquidMarketMaker {
       // Stop trade size collector
       if (this.tradeSizeCollector) {
         this.tradeSizeCollector.stop();
+      }
+
+      // Stop candle collector
+      if (this.candleCollector) {
+        this.candleCollector.stop();
       }
 
       // Close database connection pool

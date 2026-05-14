@@ -2,7 +2,8 @@ import axios, { AxiosInstance } from 'axios';
 import {
   L2OrderBook,
   HyperliquidMetaResponse,
-  HyperliquidMetaAndAssetCtxsResponse
+  HyperliquidMetaAndAssetCtxsResponse,
+  HyperliquidCandle
 } from '../types/index.js';
 
 export class HyperliquidAPI {
@@ -146,6 +147,34 @@ export class HyperliquidAPI {
     } catch (error) {
       if (error instanceof Error) {
         throw new Error(`Failed to get all perpetuals: ${error.message}`);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch OHLCV candle snapshots for a coin.
+   *
+   * Works for HIP-3 prefixed coins (e.g. "vntl:OPENAI", "xyz:DKNG") — the same
+   * coin string used with l2Book and trades subscriptions is accepted here.
+   */
+  async getCandleSnapshot(
+    coin: string,
+    interval: string,
+    startTime: number,
+    endTime: number
+  ): Promise<HyperliquidCandle[]> {
+    try {
+      const response = await this.client.post('/info', {
+        type: 'candleSnapshot',
+        req: { coin, interval, startTime, endTime },
+      });
+      return response.data || [];
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(
+          `Failed to fetch candles for ${coin} ${interval}: ${error.message}`
+        );
       }
       throw error;
     }

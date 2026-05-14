@@ -92,6 +92,21 @@ export interface HyperliquidMetaAndAssetCtxsResponse {
   assetCtxs: HyperliquidAssetContext[];
 }
 
+// Hyperliquid candleSnapshot response item
+// https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/info-endpoint#candle-snapshot
+export interface HyperliquidCandle {
+  t: number; // open time (ms)
+  T: number; // close time (ms)
+  s: string; // coin
+  i: string; // interval (e.g., "1h")
+  o: string; // open
+  c: string; // close
+  h: string; // high
+  l: string; // low
+  v: string; // volume in base asset
+  n: number; // trade count
+}
+
 // WebSocket Types
 export interface WebSocketSubscription {
   method: string;

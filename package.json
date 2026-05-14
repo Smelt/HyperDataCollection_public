@@ -9,6 +9,7 @@
     "start": "tsx src/index.ts",
     "api": "tsx src/api/spread-api.ts",
     "fetch:trades": "tsx src/fetch-trades.ts",
+    "backfill:candles": "tsx src/backfill-candles.ts",
     "build": "tsc",
     "clean": "rm -rf dist",
     "lint": "eslint src --ext .ts",

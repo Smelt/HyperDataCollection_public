@@ -1,0 +1,510 @@
+{
+  "id": null,
+  "uid": "spread-volume-hunter-v1",
+  "title": "Spread × Volume Pair Hunter",
+  "tags": ["hyperliquid", "spread", "volume", "pair-selector", "hip3"],
+  "timezone": "browser",
+  "time": { "from": "now-24h", "to": "now" },
+  "refresh": "1m",
+  "schemaVersion": 39,
+  "templating": {
+    "list": [
+      {
+        "name": "lookback_hours",
+        "label": "Lookback (hours)",
+        "type": "custom",
+        "current": { "text": "24", "value": "24" },
+        "options": [
+          { "selected": false, "text": "1", "value": "1" },
+          { "selected": false, "text": "6", "value": "6" },
+          { "selected": true,  "text": "24", "value": "24" },
+          { "selected": false, "text": "72", "value": "72" },
+          { "selected": false, "text": "168", "value": "168" }
+        ],
+        "multi": false
+      },
+      {
+        "name": "top_n",
+        "label": "Top N",
+        "type": "custom",
+        "current": { "text": "15", "value": "15" },
+        "options": [
+          { "selected": false, "text": "10", "value": "10" },
+          { "selected": true,  "text": "15", "value": "15" },
+          { "selected": false, "text": "20", "value": "20" },
+          { "selected": false, "text": "30", "value": "30" }
+        ],
+        "multi": false
+      },
+      {
+        "name": "pair",
+        "label": "Pair filter",
+        "type": "query",
+        "datasource": { "type": "mysql", "uid": "ef1n1ggi71xq8d" },
+        "query": "SELECT DISTINCT pair FROM spread_snapshots_1min WHERE timestamp >= (UNIX_TIMESTAMP(NOW()) - 3600) * 1000 ORDER BY pair",
+        "refresh": 2,
+        "includeAll": true,
+        "multi": true,
+        "current": { "text": "All", "value": "$__all" }
+      },
+      {
+        "name": "pair_filter_sql",
+        "label": "",
+        "type": "constant",
+        "current": { "text": "1=1", "value": "1=1" },
+        "hide": 2
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "row",
+      "title": "Overview (last hour)",
+      "id": 100,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Pairs tracked",
+      "gridPos": { "h": 4, "w": 5, "x": 0, "y": 1 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 5 },
+              { "color": "green", "value": 15 }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "textMode": "value",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "ef1n1ggi71xq8d" },
+          "format": "table",
+          "rawSql": "SELECT COUNT(DISTINCT pair) AS value FROM spread_snapshots_1min WHERE timestamp >= (UNIX_TIMESTAMP(NOW()) - 3600) * 1000",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Widest spread pair (1h avg)",
+      "gridPos": { "h": 4, "w": 7, "x": 5, "y": 1 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "textMode": "value_and_name",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "ef1n1ggi71xq8d" },
+          "format": "table",
+          "rawSql": "SELECT pair AS metric, ROUND(AVG(avg_spread_bps), 1) AS value FROM spread_snapshots_1min WHERE timestamp >= (UNIX_TIMESTAMP(NOW()) - 3600) * 1000 GROUP BY pair ORDER BY value DESC LIMIT 1",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Highest hourly volume (USD, last closed hour)",
+      "gridPos": { "h": 4, "w": 7, "x": 12, "y": 1 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "blue", "value": null }]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "textMode": "value_and_name",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "ef1n1ggi71xq8d" },
+          "format": "table",
+          "rawSql": "SELECT pair AS metric, volume_usd AS value FROM pair_candles_1h WHERE timestamp = ( SELECT MAX(timestamp) FROM pair_candles_1h WHERE timestamp < FLOOR(UNIX_TIMESTAMP(NOW())/3600)*3600*1000 ) ORDER BY volume_usd DESC LIMIT 1",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Avg spread across all pairs (1h)",
+      "gridPos": { "h": 4, "w": 5, "x": 19, "y": 1 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 10 },
+              { "color": "green", "value": 25 }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "textMode": "value",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "ef1n1ggi71xq8d" },
+          "format": "table",
+          "rawSql": "SELECT ROUND(AVG(avg_spread_bps), 1) AS value FROM spread_snapshots_1min WHERE timestamp >= (UNIX_TIMESTAMP(NOW()) - 3600) * 1000",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "type": "row",
+      "title": "Top pairs by spread (over $lookback_hours h)",
+      "id": 101,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 10,
+      "type": "table",
+      "title": "Top $top_n pairs — avg spread, hourly volume, book depth",
+      "description": "Ranked by avg spread over the lookback window. volume_usd_1h is the most recently completed hourly candle's USD volume; book_depth_usd is order-book depth (avg bid_size + ask_size) priced in USD, a proxy for instantaneous liquidity. score = log10(1+volume_usd_1h) × avg_spread_bps — high score = liquid AND wide.",
+      "gridPos": { "h": 14, "w": 24, "x": 0, "y": 6 },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "align": "auto", "filterable": true }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "avg_spread_bps" },
+            "properties": [
+              { "id": "custom.cellOptions", "value": { "mode": "gradient", "type": "color-background" } },
+              { "id": "color", "value": { "mode": "continuous-YlRd" } },
+              { "id": "decimals", "value": 1 },
+              { "id": "custom.width", "value": 140 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "current_spread_bps" },
+            "properties": [
+              { "id": "custom.cellOptions", "value": { "mode": "gradient", "type": "color-background" } },
+              { "id": "color", "value": { "mode": "continuous-YlRd" } },
+              { "id": "decimals", "value": 1 },
+              { "id": "custom.width", "value": 150 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "volume_usd_1h" },
+            "properties": [
+              { "id": "unit", "value": "currencyUSD" },
+              { "id": "decimals", "value": 0 },
+              { "id": "custom.cellOptions", "value": { "mode": "gradient", "type": "color-background" } },
+              { "id": "color", "value": { "mode": "continuous-blues" } },
+              { "id": "custom.width", "value": 140 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "book_depth_usd" },
+            "properties": [
+              { "id": "unit", "value": "currencyUSD" },
+              { "id": "decimals", "value": 0 },
+              { "id": "custom.cellOptions", "value": { "mode": "gradient", "type": "color-background" } },
+              { "id": "color", "value": { "mode": "continuous-purples" } },
+              { "id": "custom.width", "value": 140 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "score" },
+            "properties": [
+              { "id": "custom.cellOptions", "value": { "mode": "gradient", "type": "color-background" } },
+              { "id": "color", "value": { "mode": "continuous-GrYlRd" } },
+              { "id": "decimals", "value": 1 },
+              { "id": "custom.width", "value": 110 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "profit_after_fees_bps" },
+            "properties": [
+              { "id": "decimals", "value": 1 },
+              { "id": "custom.cellOptions", "value": { "type": "color-text" } },
+              { "id": "thresholds", "value": { "mode": "absolute", "steps": [
+                { "color": "red", "value": null },
+                { "color": "yellow", "value": 5 },
+                { "color": "green", "value": 15 }
+              ]}},
+              { "id": "custom.width", "value": 150 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "pair" },
+            "properties": [
+              { "id": "custom.width", "value": 180 }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [{ "displayName": "score", "desc": true }]
+      },
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "ef1n1ggi71xq8d" },
+          "format": "table",
+          "rawSql": "WITH spread_agg AS ( SELECT pair, AVG(avg_spread_bps) AS avg_spread_bps, SUM(sample_count) AS samples, AVG((avg_bid_size + avg_ask_size) * avg_price) AS book_depth_usd, MAX(timestamp) AS last_ts FROM spread_snapshots_1min WHERE timestamp >= (UNIX_TIMESTAMP(NOW()) - $lookback_hours * 3600) * 1000 GROUP BY pair ), current_spread AS ( SELECT s.pair, s.avg_spread_bps AS current_spread_bps FROM spread_snapshots_1min s INNER JOIN ( SELECT pair, MAX(timestamp) AS max_ts FROM spread_snapshots_1min WHERE timestamp >= (UNIX_TIMESTAMP(NOW()) - 3600) * 1000 GROUP BY pair ) lt ON lt.pair = s.pair AND lt.max_ts = s.timestamp ), vol_1h AS ( SELECT pair, volume_usd AS volume_usd_1h FROM pair_candles_1h WHERE timestamp = ( SELECT MAX(timestamp) FROM pair_candles_1h WHERE timestamp < FLOOR(UNIX_TIMESTAMP(NOW())/3600)*3600*1000 ) ) SELECT sa.pair, ROUND(sa.avg_spread_bps, 2) AS avg_spread_bps, ROUND(cs.current_spread_bps, 2) AS current_spread_bps, ROUND(COALESCE(v.volume_usd_1h, 0), 0) AS volume_usd_1h, ROUND(sa.book_depth_usd, 0) AS book_depth_usd, ROUND(sa.avg_spread_bps - 3.0, 2) AS profit_after_fees_bps, ROUND(LOG10(1 + COALESCE(v.volume_usd_1h, 0)) * sa.avg_spread_bps, 1) AS score, sa.samples FROM spread_agg sa LEFT JOIN current_spread cs ON cs.pair = sa.pair LEFT JOIN vol_1h v ON v.pair = sa.pair ORDER BY sa.avg_spread_bps DESC LIMIT $top_n",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "type": "row",
+      "title": "Hour-of-day spread heatmap (UTC)",
+      "id": 102,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 20 },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 20,
+      "type": "heatmap",
+      "title": "Avg spread (bps) by pair × hour-of-day — last $lookback_hours h",
+      "description": "Each cell is the avg spread for that pair during that UTC hour-of-day. Equity-mirror pairs (xyz:*) should show a clear band around US market hours (13:30–20:00 UTC). Filter to a subset of pairs with the 'Pair filter' variable.",
+      "gridPos": { "h": 14, "w": 24, "x": 0, "y": 21 },
+      "options": {
+        "calculate": false,
+        "cellGap": 1,
+        "color": {
+          "exponent": 0.5,
+          "fill": "dark-orange",
+          "mode": "scheme",
+          "reverse": false,
+          "scale": "exponential",
+          "scheme": "YlOrRd",
+          "steps": 64
+        },
+        "rowsFrame": { "layout": "auto" },
+        "yAxis": { "axisPlacement": "left", "reverse": false },
+        "tooltip": { "show": true, "yHistogram": false },
+        "legend": { "show": true }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "scaleDistribution": { "type": "linear" }, "hideFrom": { "tooltip": false, "viz": false, "legend": false } }
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "ef1n1ggi71xq8d" },
+          "format": "table",
+          "rawSql": "SELECT HOUR(FROM_UNIXTIME(timestamp/1000)) AS hour_of_day, pair, ROUND(AVG(avg_spread_bps), 1) AS avg_spread_bps FROM spread_snapshots_1min WHERE timestamp >= (UNIX_TIMESTAMP(NOW()) - $lookback_hours * 3600) * 1000 AND pair IN (${pair:sqlstring}) GROUP BY hour_of_day, pair ORDER BY pair, hour_of_day",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "type": "row",
+      "title": "Hour-of-day volume heatmap (UTC)",
+      "id": 103,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 35 },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 30,
+      "type": "heatmap",
+      "title": "Hourly volume (USD) by pair × hour-of-day — last $lookback_hours h",
+      "description": "Pair the spread heatmap with realized volume. A pair that's wide AND has volume during the same UTC hours = best target. xyz:DKNG/MRVL/etc. will show strong bands during NYSE hours (13:30–20:00 UTC).",
+      "gridPos": { "h": 14, "w": 24, "x": 0, "y": 36 },
+      "options": {
+        "calculate": false,
+        "cellGap": 1,
+        "color": {
+          "exponent": 0.5,
+          "fill": "dark-blue",
+          "mode": "scheme",
+          "reverse": false,
+          "scale": "exponential",
+          "scheme": "Blues",
+          "steps": 64
+        },
+        "rowsFrame": { "layout": "auto" },
+        "yAxis": { "axisPlacement": "left", "reverse": false },
+        "tooltip": { "show": true, "yHistogram": false },
+        "legend": { "show": true }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "scaleDistribution": { "type": "linear" }, "hideFrom": { "tooltip": false, "viz": false, "legend": false } }
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "ef1n1ggi71xq8d" },
+          "format": "table",
+          "rawSql": "SELECT HOUR(FROM_UNIXTIME(timestamp/1000)) AS hour_of_day, pair, ROUND(AVG(volume_usd), 0) AS volume_usd FROM pair_candles_1h WHERE timestamp >= (UNIX_TIMESTAMP(NOW()) - $lookback_hours * 3600) * 1000 AND pair IN (${pair:sqlstring}) GROUP BY hour_of_day, pair ORDER BY pair, hour_of_day",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "type": "row",
+      "title": "Liquid × wide pairs (current state)",
+      "id": 104,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 50 },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 40,
+      "type": "barchart",
+      "title": "Current spread vs hourly volume — top $top_n by score",
+      "description": "Side-by-side: avg spread (right axis, bps) vs hourly volume (left axis, USD). The 'sweet spot' is pairs with tall bars on BOTH axes — they're wide enough to be profitable and active enough to fill orders.",
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 51 },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "lineWidth": 1
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "avg_spread_bps" },
+            "properties": [
+              { "id": "custom.axisPlacement", "value": "right" },
+              { "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } },
+              { "id": "unit", "value": "short" }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "volume_usd_1h" },
+            "properties": [
+              { "id": "custom.axisPlacement", "value": "left" },
+              { "id": "color", "value": { "mode": "fixed", "fixedColor": "blue" } },
+              { "id": "unit", "value": "currencyUSD" }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "orientation": "vertical",
+        "xField": "pair",
+        "barWidth": 0.7,
+        "groupWidth": 0.7,
+        "legend": { "showLegend": true, "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "ef1n1ggi71xq8d" },
+          "format": "table",
+          "rawSql": "WITH spread_agg AS ( SELECT pair, AVG(avg_spread_bps) AS avg_spread_bps FROM spread_snapshots_1min WHERE timestamp >= (UNIX_TIMESTAMP(NOW()) - 3600) * 1000 GROUP BY pair ), vol_1h AS ( SELECT pair, volume_usd AS volume_usd_1h FROM pair_candles_1h WHERE timestamp = ( SELECT MAX(timestamp) FROM pair_candles_1h WHERE timestamp < FLOOR(UNIX_TIMESTAMP(NOW())/3600)*3600*1000 ) ) SELECT sa.pair, ROUND(sa.avg_spread_bps, 1) AS avg_spread_bps, ROUND(COALESCE(v.volume_usd_1h, 0), 0) AS volume_usd_1h FROM spread_agg sa LEFT JOIN vol_1h v ON v.pair = sa.pair ORDER BY LOG10(1 + COALESCE(v.volume_usd_1h, 0)) * sa.avg_spread_bps DESC LIMIT $top_n",
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "type": "row",
+      "title": "Per-pair series",
+      "id": 105,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 63 },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 50,
+      "type": "timeseries",
+      "title": "Hourly volume (USD) — selected pairs",
+      "description": "Time series of hourly notional volume per selected pair (use 'Pair filter' to focus).",
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 64 },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "bars", "fillOpacity": 80, "lineWidth": 1, "barAlignment": 0 },
+          "unit": "currencyUSD"
+        }
+      },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom", "showLegend": true, "calcs": ["sum", "mean", "lastNotNull"] },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "ef1n1ggi71xq8d" },
+          "format": "time_series",
+          "rawSql": "SELECT FROM_UNIXTIME(timestamp/1000) AS time, pair AS metric, volume_usd AS value FROM pair_candles_1h WHERE timestamp >= (UNIX_TIMESTAMP(NOW()) - $lookback_hours * 3600) * 1000 AND pair IN (${pair:sqlstring}) ORDER BY timestamp",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 51,
+      "type": "timeseries",
+      "title": "Spread (bps) — selected pairs",
+      "description": "1-minute avg spread per selected pair over the lookback window.",
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 64 },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 1 },
+          "unit": "short"
+        }
+      },
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom", "showLegend": true, "calcs": ["mean", "max", "lastNotNull"] },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "ef1n1ggi71xq8d" },
+          "format": "time_series",
+          "rawSql": "SELECT FROM_UNIXTIME(timestamp/1000) AS time, pair AS metric, avg_spread_bps AS value FROM spread_snapshots_1min WHERE timestamp >= (UNIX_TIMESTAMP(NOW()) - $lookback_hours * 3600) * 1000 AND pair IN (${pair:sqlstring}) ORDER BY timestamp",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}
